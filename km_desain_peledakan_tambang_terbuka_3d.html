@@ -1,0 +1,4237 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>KM — Desain Peledakan Tambang Terbuka 3D</title>
+
+  <style>
+    /* =========================================================================
+       1. DESIGN TOKENS & RESET (100% OFFLINE — ZERO EXTERNAL DEPENDENCIES)
+       ========================================================================= */
+    :root {
+      --bg-page: #060a13;
+      --bg-card: #0c1322;
+      --bg-subcard: #080d19;
+      --bg-input: #10192c;
+      --border-subtle: #1e293b;
+      --border-strong: #334155;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --amber: #f59e0b;
+      --amber-light: #fcd34d;
+      --orange: #f97316;
+      --cyan: #22d3ee;
+      --emerald: #10b981;
+      --violet: #a78bfa;
+      --rose: #f43f5e;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      min-height: 100vh;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.45;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button, input, select {
+      font-family: inherit;
+    }
+
+    /* =========================================================================
+       2. TOP STICKY TOOLBAR & KM GEOMETRIC MONOGRAM
+       ========================================================================= */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 45;
+      background: rgba(6, 10, 19, 0.96);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border-subtle);
+      background-image: radial-gradient(rgba(245, 158, 11, 0.1) 1px, transparent 1px);
+      background-size: 18px 18px;
+      padding: 10px 14px 0 14px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+    }
+
+    .topbar-inner {
+      max-width: 1580px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 10px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .km-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 13px;
+      background: linear-gradient(135deg, #fbbf24, #f97316, #06b6d4);
+      padding: 2px;
+      flex-shrink: 0;
+      box-shadow: 0 6px 18px rgba(245, 158, 11, 0.28);
+    }
+
+    .km-badge-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 11px;
+      background: #060a13;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .km-letters {
+      font-family: var(--font-mono);
+      font-weight: 900;
+      font-size: 15.5px;
+      letter-spacing: -0.5px;
+      color: #fbbf24;
+      line-height: 1;
+    }
+
+    .km-sub {
+      font-family: var(--font-mono);
+      font-size: 7.5px;
+      font-weight: 800;
+      color: var(--cyan);
+      letter-spacing: 1.4px;
+      margin-top: 2px;
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-title span {
+      color: var(--amber);
+    }
+
+    .brand-subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    .topbar-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .control-pill-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #0a101f;
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      padding: 3px;
+    }
+
+    .pill-caption {
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-dim);
+      padding: 0 6px 0 8px;
+    }
+
+    .unit-btn, .formula-mode-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+
+    .unit-btn:hover, .formula-mode-btn:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .unit-btn.active {
+      background: linear-gradient(135deg, #f59e0b, #ea580c);
+      color: #060a13;
+      font-weight: 800;
+      box-shadow: 0 2px 10px rgba(245, 158, 11, 0.35);
+    }
+
+    .formula-mode-btn.active {
+      background: rgba(34, 211, 238, 0.2);
+      color: #67e8f9;
+      box-shadow: inset 0 0 0 1px rgba(34, 211, 238, 0.45);
+    }
+
+    /* Navigation Tabs & Quick Action Strip */
+    .nav-strip {
+      max-width: 1580px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      border-top: 1px solid rgba(30, 41, 59, 0.85);
+      padding: 7px 0;
+    }
+
+    .nav-tabs {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 1px;
+    }
+
+    .nav-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .nav-tab {
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+
+    .nav-tab:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-tab.active {
+      background: rgba(245, 158, 11, 0.15);
+      border-color: rgba(245, 158, 11, 0.45);
+      color: var(--amber-light);
+      box-shadow: 0 2px 10px rgba(245, 158, 11, 0.14);
+    }
+
+    .nav-export-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .btn-mini {
+      padding: 6px 10px;
+      min-height: 31px;
+      font-size: 11px;
+      border-radius: 9px;
+    }
+
+    /* =========================================================================
+       3. CONTAINER, PANELS, BUTTONS & INPUT WORKSPACE
+       ========================================================================= */
+    .container {
+      max-width: 1580px;
+      margin: 0 auto;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 15px;
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.42);
+    }
+
+    .panel.section-hidden {
+      display: none;
+    }
+
+    .panel-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 12px;
+      margin-bottom: 13px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .tag-pill {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      background: rgba(245, 158, 11, 0.12);
+      color: var(--amber-light);
+      margin-bottom: 4px;
+    }
+
+    .panel-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    .btn-cluster {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .btn {
+      background: var(--bg-input);
+      border: 1px solid var(--border-strong);
+      color: var(--text-main);
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 7px 12px;
+      min-height: 34px;
+      border-radius: 11px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .btn:hover {
+      border-color: var(--amber);
+      color: #ffffff;
+      background: #16223b;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #f59e0b, #ea580c);
+      border-color: #fbbf24;
+      color: #060a13;
+      font-weight: 800;
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.32);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #fbbf24, #f97316);
+      color: #060a13;
+    }
+
+    .btn-active, .btn-cam.active {
+      background: rgba(34, 211, 238, 0.18);
+      border-color: var(--cyan);
+      color: #67e8f9;
+    }
+
+    .btn-danger {
+      border-color: rgba(244, 63, 94, 0.45);
+      color: #fda4af;
+    }
+
+    .btn-danger:hover {
+      background: rgba(244, 63, 94, 0.16);
+      border-color: var(--rose);
+      color: #ffffff;
+    }
+
+    .btn-blast {
+      background: linear-gradient(135deg, #ef4444, #f97316);
+      border-color: #fca5a5;
+      color: #ffffff;
+      font-weight: 800;
+      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+    }
+
+    /* Scenario Bar */
+    .scenario-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: var(--bg-subcard);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 9px 12px;
+      margin-bottom: 13px;
+    }
+
+    .scenario-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 7px;
+      flex: 1;
+    }
+
+    .scenario-select {
+      background: var(--bg-input);
+      border: 1px solid var(--border-strong);
+      color: var(--text-main);
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 11.5px;
+      min-height: 34px;
+      min-width: 190px;
+    }
+
+    /* 5-Card Input Grid */
+    .input-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    @media (min-width: 680px) {
+      .input-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1180px) {
+      .input-grid {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+
+    .input-card {
+      background: var(--bg-subcard);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .input-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      padding-bottom: 7px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .unit-tag {
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      color: var(--cyan);
+      background: rgba(34, 211, 238, 0.1);
+      padding: 1px 5px;
+      border-radius: 5px;
+    }
+
+    .field input, .field select {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border-strong);
+      color: #ffffff;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 7px 9px;
+      border-radius: 10px;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    .field input:focus, .field select:focus {
+      border-color: var(--amber);
+    }
+
+    .field input:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      background: #0b1120;
+    }
+
+    .field-row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .pattern-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .pattern-btn {
+      background: var(--bg-input);
+      border: 1px solid var(--border-strong);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 7px 6px;
+      border-radius: 9px;
+      cursor: pointer;
+    }
+
+    .pattern-btn.active {
+      background: rgba(245, 158, 11, 0.18);
+      border-color: var(--amber);
+      color: var(--amber-light);
+    }
+
+    .hidden-formula {
+      display: none !important;
+    }
+
+    /* =========================================================================
+       4. 3D VIEWPORT PANEL & SINGLE BOREHOLE PROFILE STRIP
+       ========================================================================= */
+    .viewport-panel {
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .viewport-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 11px 14px;
+      background: #080e1c;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .slicer-bar {
+      padding: 10px 14px;
+      background: #070b16;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .hole-profile-strip {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .hole-diagram-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+    }
+
+    #single-hole-canvas {
+      background: #060a13;
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      flex-shrink: 0;
+    }
+
+    .hole-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    @media (min-width: 768px) {
+      .hole-specs-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .hole-spec-box {
+      background: var(--bg-subcard);
+      border: 1px solid var(--border-subtle);
+      border-radius: 11px;
+      padding: 7px 10px;
+    }
+
+    .hole-spec-box span {
+      display: block;
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .hole-spec-box strong {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      width: 100%;
+      height: 490px;
+      min-height: 440px;
+      background: radial-gradient(circle at 50% 42%, #0f1b33 0%, #050811 100%);
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    #blast-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+    }
+
+    #blast-canvas:active {
+      cursor: grabbing;
+    }
+
+    .hud-top-left {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-width: 270px;
+      z-index: 10;
+    }
+
+    .safety-card {
+      background: rgba(6, 10, 19, 0.9);
+      border: 1px solid var(--border-strong);
+      border-radius: 13px;
+      padding: 8px 11px;
+      backdrop-filter: blur(8px);
+      font-size: 10.5px;
+    }
+
+    .safety-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 5px;
+    }
+
+    .safety-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .badge-ok, .badge-warn {
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 5px;
+    }
+
+    .badge-ok {
+      background: rgba(16, 185, 129, 0.18);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.45);
+    }
+
+    .badge-warn {
+      background: rgba(244, 63, 94, 0.2);
+      color: #fda4af;
+      border: 1px solid rgba(244, 63, 94, 0.5);
+    }
+
+    .inspect-card {
+      display: none;
+      background: rgba(6, 10, 19, 0.95);
+      border: 1px solid var(--cyan);
+      border-radius: 13px;
+      padding: 9px 11px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.6);
+    }
+
+    .inspect-card.open {
+      display: block;
+    }
+
+    .inspect-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 5px;
+      margin-bottom: 6px;
+    }
+
+    .inspect-title {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      font-weight: 800;
+      color: var(--cyan);
+    }
+
+    .inspect-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      padding: 0 4px;
+    }
+
+    .inspect-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px 10px;
+      font-size: 10.5px;
+    }
+
+    .inspect-item span {
+      display: block;
+      color: var(--text-muted);
+      font-size: 9.5px;
+    }
+
+    .inspect-item strong {
+      font-family: var(--font-mono);
+      color: #ffffff;
+      font-size: 11px;
+    }
+
+    .hud-telemetry {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(6, 10, 19, 0.9);
+      border: 1px solid var(--border-strong);
+      border-radius: 13px;
+      padding: 8px 12px;
+      text-align: right;
+      pointer-events: none;
+      backdrop-filter: blur(8px);
+    }
+
+    .hud-telemetry .lbl {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .hud-telemetry .val {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--amber);
+    }
+
+    .hud-telemetry .sub {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--cyan);
+    }
+
+    .hud-bottom {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      right: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .touch-hint {
+      pointer-events: auto;
+      background: rgba(6, 10, 19, 0.88);
+      border: 1px solid var(--border-subtle);
+      border-radius: 11px;
+      padding: 7px 10px;
+      font-size: 10.5px;
+      color: #cbd5e1;
+    }
+
+    .sim-controls {
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-left: auto;
+      background: rgba(6, 10, 19, 0.94);
+      border: 1px solid var(--border-strong);
+      border-radius: 14px;
+      padding: 5px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.55);
+    }
+
+    .legend-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 15px;
+      background: #070c17;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 11px;
+    }
+
+    .legend-items {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: #cbd5e1;
+      font-weight: 600;
+    }
+
+    .swatch {
+      width: 11px;
+      height: 11px;
+      border-radius: 3px;
+      display: inline-block;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+    }
+
+    /* KPI Strip */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      padding: 12px 14px;
+      background: #090f1d;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    @media (min-width: 640px) {
+      .kpi-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    @media (min-width: 1100px) {
+      .kpi-grid {
+        grid-template-columns: repeat(8, 1fr);
+      }
+    }
+
+    .kpi-box {
+      background: var(--bg-subcard);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 8px 10px;
+    }
+
+    .kpi-label {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .kpi-value {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      font-weight: 800;
+      margin-top: 2px;
+    }
+
+    /* =========================================================================
+       6. RESULTS & FORMULA BREAKDOWN (BAGIAN I.a - I.d) + DELAY SCHEDULE
+       ========================================================================= */
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 13px;
+    }
+
+    @media (min-width: 960px) {
+      .results-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .result-card {
+      background: var(--bg-subcard);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 13px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .result-card-header {
+      padding-bottom: 7px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .result-sec-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .result-sec-title {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-top: 2px;
+    }
+
+    .formula-item {
+      background: #0c1425;
+      border: 1px solid var(--border-subtle);
+      border-radius: 11px;
+      padding: 8px 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    @media (min-width: 540px) {
+      .formula-item {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+    }
+
+    .formula-item.highlight {
+      background: rgba(245, 158, 11, 0.09);
+      border-color: rgba(245, 158, 11, 0.42);
+    }
+
+    .f-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+
+    .f-eq {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--text-muted);
+    }
+
+    .f-sub {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+
+    .f-val {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      font-weight: 800;
+      color: var(--cyan);
+      white-space: nowrap;
+    }
+
+    .formula-item.highlight .f-val {
+      color: var(--amber-light);
+    }
+
+    .sr-pill {
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      border: 1px solid rgba(16, 185, 129, 0.45);
+      background: rgba(16, 185, 129, 0.14);
+      color: #6ee7b7;
+    }
+
+    .sr-pill.warn {
+      border-color: rgba(245, 158, 11, 0.5);
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--amber-light);
+    }
+
+    .sr-pill.danger {
+      border-color: rgba(244, 63, 94, 0.5);
+      background: rgba(244, 63, 94, 0.15);
+      color: #fda4af;
+    }
+
+    /* Delay Schedule Table */
+    .table-wrap {
+      margin-top: 14px;
+      background: var(--bg-subcard);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 13px;
+    }
+
+    .table-scroll {
+      width: 100%;
+      overflow-x: auto;
+      max-height: 250px;
+      margin-top: 9px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-align: left;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #10192d;
+      color: var(--amber-light);
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border-strong);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 7px 10px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: #cbd5e1;
+      white-space: nowrap;
+    }
+
+    tr:hover td {
+      background: rgba(34, 211, 238, 0.08);
+      cursor: pointer;
+    }
+
+    /* =========================================================================
+       7. MODALS & TOAST NOTIFICATION
+       ========================================================================= */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      background: rgba(2, 6, 23, 0.84);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 520px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-strong);
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      z-index: 75;
+      background: #0f172a;
+      border: 1px solid var(--amber);
+      color: var(--amber-light);
+      padding: 10px 14px;
+      border-radius: 13px;
+      font-size: 12px;
+      font-weight: 700;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toast.show {
+      display: flex;
+    }
+
+    .footer {
+      border-top: 1px solid var(--border-subtle);
+      background: #050810;
+      padding: 14px 16px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 10px;
+    }
+
+    /* =========================================================================
+       8. CLEAN PRINT / PDF STYLESHEET
+       ========================================================================= */
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #0f172a !important;
+      }
+      .topbar, .panel, .input-card, .result-card, .formula-item, .kpi-box, .table-wrap {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        border-color: #cbd5e1 !important;
+        box-shadow: none !important;
+      }
+      .topbar {
+        position: static !important;
+      }
+      .topbar-actions, .nav-strip, .scenario-bar, .viewport-toolbar, .slicer-bar, .hud-bottom, .btn, .toast, .modal-backdrop {
+        display: none !important;
+      }
+      .brand-title, .panel-title, .result-sec-title, .f-name, .kpi-value, td, th {
+        color: #0f172a !important;
+      }
+      .f-val {
+        color: #0369a1 !important;
+      }
+      .canvas-wrapper {
+        height: 360px !important;
+        min-height: 360px !important;
+        background: #0b1220 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ======================================================================= -->
+  <!-- TOP STICKY HEADER: KM MONOGRAM, UNIT TOGGLE & EXPORT ACTIONS            -->
+  <!-- ======================================================================= -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="km-badge" aria-hidden="true">
+          <div class="km-badge-inner">
+            <span class="km-letters">KM</span>
+            <span class="km-sub">3D</span>
+          </div>
+        </div>
+        <div>
+          <h1 class="brand-title">KM — <span>Desain Peledakan Tambang Terbuka 3D</span></h1>
+          <p class="brand-subtitle">Perancangan Geometri Peledakan Metode R.L. Ash &amp; Simulasi 3D Interaktif</p>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <!-- Segmented Unit Switcher -->
+        <div class="control-pill-group" role="group" aria-label="Pilih Sistem Satuan">
+          <span class="pill-caption">Satuan</span>
+          <button type="button" class="unit-btn active" data-unit="imperial">Imperial (ft)</button>
+          <button type="button" class="unit-btn" data-unit="metric">Metrik (m)</button>
+        </div>
+
+        <!-- Segmented Formula Display Switcher -->
+        <div class="control-pill-group" role="group" aria-label="Tampilan Rumus">
+          <span class="pill-caption">Rumus</span>
+          <button type="button" class="formula-mode-btn active" data-show-formula="true">Tampil</button>
+          <button type="button" class="formula-mode-btn" data-show-formula="false">Sembunyi</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clean Section Navigation & Export Strip -->
+    <nav class="nav-strip" aria-label="Navigasi Workspace">
+      <div class="nav-tabs" role="tablist">
+        <button type="button" class="nav-tab active" data-view="all">❖ Semua Panel</button>
+        <button type="button" class="nav-tab" data-view="input">⚙️ 1. Data Diketahui</button>
+        <button type="button" class="nav-tab" data-view="3d">🧊 2. Desain 3D &amp; Simulasi</button>
+        <button type="button" class="nav-tab" data-view="calc">📐 3. Hasil &amp; Rumus</button>
+      </div>
+
+      <div class="nav-export-group">
+        <button type="button" id="btn-export-png" class="btn btn-mini">📷 Simpan 3D (.PNG)</button>
+        <button type="button" id="btn-export-csv" class="btn btn-mini">📊 Export CSV</button>
+        <button type="button" id="btn-print-pdf" class="btn btn-mini">🖨 Cetak / PDF</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container">
+
+    <!-- ===================================================================== -->
+    <!-- SECTION 1: DATA DIKETAHUI (INPUT PARAMETER) & SCENARIO MANAGER        -->
+    <!-- ===================================================================== -->
+    <section id="sec-input" class="panel" aria-labelledby="sec1-heading">
+      <div class="panel-header">
+        <div>
+          <span class="tag-pill">Input Workspace &bull; <span id="lbl-unit-banner">Satuan: Imperial (ft, inci, lb, bcf, fps)</span></span>
+          <h2 id="sec1-heading" class="panel-title">1. Data Diketahui &amp; Parameter Perancangan Peledakan</h2>
+        </div>
+        <div class="btn-cluster">
+          <button type="button" id="btn-reset-default" class="btn">↺ Reset Default</button>
+          <button type="button" id="btn-recalc-3d" class="btn btn-primary">⚡ Hitung &amp; Perbarui 3D</button>
+        </div>
+      </div>
+
+      <!-- Local Scenario Manager Strip -->
+      <div class="scenario-bar">
+        <div class="scenario-controls">
+          <span style="font-size: 11px; font-weight: 800; color: var(--amber-light);">💾 Skenario Tersimpan:</span>
+          <select id="select-scenario" class="scenario-select" aria-label="Pilih Skenario Tersimpan">
+            <option value="">-- Pilih Skenario (0) --</option>
+          </select>
+          <button type="button" id="btn-load-scenario" class="btn">Muat</button>
+          <button type="button" id="btn-open-save-modal" class="btn">+ Simpan Baru</button>
+        </div>
+        <button type="button" id="btn-delete-scenario" class="btn btn-danger">Hapus</button>
+      </div>
+
+      <!-- 5 Input Parameter Cards -->
+      <div class="input-grid">
+        <!-- CARD 1: DATA PRODUKSI -->
+        <div class="input-card">
+          <div class="input-card-head" style="color: var(--cyan);">
+            <span>1. Data Produksi</span>
+            <span style="color: var(--text-dim); font-family: var(--font-mono);">Target OB</span>
+          </div>
+
+          <div class="field">
+            <label for="sel-target-type"><span>Satuan Target OB</span><span class="unit-tag">Mode</span></label>
+            <select id="sel-target-type">
+              <option value="volume">Volume (bcf/bln atau m³/bln)</option>
+              <option value="ton">Tonase (ton/bln)</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="inp-target-ob">
+              <span>Target OB</span>
+              <span id="u-ob" class="unit-tag">bcf/bln</span>
+            </label>
+            <input id="inp-target-ob" type="number" step="any" min="100" />
+          </div>
+
+          <div class="field-row-2">
+            <div class="field">
+              <label for="inp-hari"><span>Hari Kerja / Bln</span><span class="unit-tag">hari</span></label>
+              <input id="inp-hari" type="number" step="1" min="1" max="31" />
+            </div>
+            <div class="field">
+              <label for="inp-frek"><span>Frekuensi / Hari</span><span class="unit-tag">kali</span></label>
+              <input id="inp-frek" type="number" step="1" min="1" max="12" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="inp-losses"><span>Mining Losses</span><span class="unit-tag">%</span></label>
+            <input id="inp-losses" type="number" step="0.5" min="0" max="80" />
+          </div>
+        </div>
+
+        <!-- CARD 2: DATA GEOTEKNIK & LOKASI AMAN -->
+        <div class="input-card">
+          <div class="input-card-head" style="color: var(--emerald);">
+            <span>2. Geoteknik &amp; Dimensi Pit</span>
+            <span style="color: var(--text-dim); font-family: var(--font-mono);">Lereng</span>
+          </div>
+
+          <div class="field-row-2">
+            <div class="field">
+              <label for="inp-hlereng"><span>Tinggi Lereng</span><span class="unit-tag u-len">ft</span></label>
+              <input id="inp-hlereng" type="number" step="any" min="3" />
+            </div>
+            <div class="field">
+              <label for="sel-w-mode"><span>Mode Lebar (W)</span></label>
+              <select id="sel-w-mode">
+                <option value="manual">Input Manual</option>
+                <option value="formula">Rumus (Row × B)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field-row-2">
+            <div class="field">
+              <label for="inp-wlereng"><span>Lebar Lereng (W)</span><span class="unit-tag u-len">ft</span></label>
+              <input id="inp-wlereng" type="number" step="any" min="5" />
+            </div>
+            <div class="field">
+              <label for="inp-pj-auto"><span>Panjang (V / W×H)</span><span class="unit-tag u-len">ft</span></label>
+              <input id="inp-pj-auto" type="text" disabled value="271.60" />
+            </div>
+          </div>
+
+          <div class="field-row-2">
+            <div class="field">
+              <label for="inp-rhobat"><span>Density Batuan</span><span class="unit-tag u-dens">lb/ft³</span></label>
+              <input id="inp-rhobat" type="number" step="any" min="10" />
+            </div>
+            <div class="field">
+              <label for="inp-rhostd"><span>Density Std</span><span class="unit-tag u-dens">lb/ft³</span></label>
+              <input id="inp-rhostd" type="number" step="any" min="10" />
+            </div>
+          </div>
+
+          <div class="field-row-2">
+            <div class="field">
+              <label for="inp-dist-pemukiman"><span>Jarak Pemukiman</span><span class="unit-tag u-len">ft</span></label>
+              <input id="inp-dist-pemukiman" type="number" step="any" min="10" />
+            </div>
+            <div class="field">
+              <label for="inp-dist-infra"><span>Jarak Infra Vital</span><span class="unit-tag u-len">ft</span></label>
+              <input id="inp-dist-infra" type="number" step="any" min="10" />
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 3: ALAT BOR, POLA & DELAY -->
+        <div class="input-card">
+          <div class="input-card-head" style="color: var(--amber);">
+            <span>3. Alat Bor, Pola &amp; Delay</span>
+            <span id="lbl-de-conv" style="color: var(--text-muted); font-family: var(--font-mono);">= 0.50 ft</span>
+          </div>
+
+          <div class="field-row-2">
+            <div class="field">
+              <label for="inp-de"><span>Diameter (De)</span><span id="u-de" class="unit-tag">inci</span></label>
+              <input id="inp-de" type="number" step="any" min="0.5" />
+            </div>
+            <div class="field">
+              <label for="sel-blast-seq"><span>Pola Peledakan</span></label>
+              <select id="sel-blast-seq">
+                <option value="corner_cut">Corner Cut</option>
+                <option value="box_cut">Box Cut</option>
+                <option value="v_cut">V-Cut</option>
+                <option value="hole_by_hole">Hole by Hole</option>
+                <option value="row_by_row">Row by Row</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label><span>Susunan Lubang Bor</span><span class="unit-tag">Grid</span></label>
+            <div class="pattern-group">
+              <button type="button" class="pattern-btn active" data-pattern="rectangular">Rectangular</button>
+              <button type="button" class="pattern-btn" data-pattern="staggered">Staggered</button>
+            </div>
+          </div>
+
+          <div class="field-row-2">
+            <div class="field">
+              <label for="inp-face-angle"><span>Muka Jenjang</span><span class="unit-tag">deg</span></label>
+              <input id="inp-face-angle" type="number" step="1" min="65" max="90" />
+            </div>
+            <div class="field">
+              <label for="inp-hole-inc"><span>Sudut Lubang (&alpha;)</span><span class="unit-tag">deg</span></label>
+              <input id="inp-hole-inc" type="number" step="1" min="0" max="25" />
+            </div>
+          </div>
+
+          <div class="field-row-2">
+            <div class="field">
+              <label for="inp-delay-hole"><span>Delay Lubang</span><span class="unit-tag">ms</span></label>
+              <input id="inp-delay-hole" type="number" step="1" min="0" max="500" />
+            </div>
+            <div class="field">
+              <label for="inp-delay-row"><span>Delay Baris</span><span class="unit-tag">ms</span></label>
+              <input id="inp-delay-row" type="number" step="1" min="0" max="1000" />
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 4: DATA BAHAN PELEDAK -->
+        <div class="input-card">
+          <div class="input-card-head" style="color: var(--orange);">
+            <span>4. Data Bahan Peledak</span>
+            <span style="color: var(--text-dim); font-family: var(--font-mono);">Energi</span>
+          </div>
+
+          <div class="field-row-2">
+            <div class="field">
+              <label for="sel-sg-mode"><span>Mode SG BP</span></label>
+              <select id="sel-sg-mode">
+                <option value="formula">Rumus (141 / CC)</option>
+                <option value="manual">Input Langsung</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="inp-sg-direct"><span>SG BP (ANFO 0.85)</span></label>
+              <input id="inp-sg-direct" type="number" step="0.01" min="0.4" max="1.8" />
+            </div>
+          </div>
+
+          <div class="field-row-2">
+            <div class="field">
+              <label for="inp-cc"><span>Cartridge (CC)</span><span class="unit-tag">/50lb</span></label>
+              <input id="inp-cc" type="number" step="1" min="20" max="400" />
+            </div>
+            <div class="field">
+              <label for="inp-sgstd"><span>SG BP Std</span><span class="unit-tag">-</span></label>
+              <input id="inp-sgstd" type="number" step="0.05" min="0.2" max="2.5" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="inp-vod"><span>VOD Bahan Peledak</span><span class="unit-tag u-vel">fps</span></label>
+            <input id="inp-vod" type="number" step="any" min="500" />
+          </div>
+
+          <div class="field">
+            <label for="inp-vodstd"><span>VOD Standar</span><span class="unit-tag u-vel">fps</span></label>
+            <input id="inp-vodstd" type="number" step="any" min="500" />
+          </div>
+        </div>
+
+        <!-- CARD 5: RASIO GEOMETRI & PEMBULATAN (METODE R.L. ASH) -->
+        <div class="input-card">
+          <div class="input-card-head" style="color: var(--violet);">
+            <span>5. Rasio &amp; Pembulatan</span>
+            <span style="color: var(--text-dim); font-family: var(--font-mono);">R.L. Ash</span>
+          </div>
+
+          <div class="field-row-2">
+            <div class="field">
+              <label for="inp-kbstd"><span>KB Standar</span></label>
+              <input id="inp-kbstd" type="number" step="0.5" min="5" max="60" />
+            </div>
+            <div class="field">
+              <label for="inp-ks"><span>K<sub>S</sub> (Spasi)</span></label>
+              <input id="inp-ks" type="number" step="0.05" min="0.3" max="3" />
+            </div>
+            <div class="field">
+              <label for="inp-kj"><span>K<sub>J</sub> (Subdrill)</span></label>
+              <input id="inp-kj" type="number" step="0.05" min="0" max="1.2" />
+            </div>
+            <div class="field">
+              <label for="inp-kt"><span>K<sub>T</sub> (Stemming)</span></label>
+              <input id="inp-kt" type="number" step="0.05" min="0.1" max="1.8" />
+            </div>
+          </div>
+
+          <div class="field-row-2">
+            <div class="field">
+              <label for="sel-row-mode"><span>Jumlah Row</span></label>
+              <select id="sel-row-mode">
+                <option value="ceil">Rumus (W/B &uarr;)</option>
+                <option value="manual">Pilih Sendiri</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="inp-row-manual"><span>Nilai Row</span></label>
+              <input id="inp-row-manual" type="number" step="1" min="1" max="40" />
+            </div>
+          </div>
+
+          <div class="field-row-2">
+            <div class="field">
+              <label for="sel-h-mode"><span>Rumus H</span></label>
+              <select id="sel-h-mode">
+                <option value="bench_plus_j">H_lereng + J</option>
+                <option value="kh_burden">K_h &times; Burden</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="inp-kh"><span>Nilai K<sub>h</sub></span></label>
+              <input id="inp-kh" type="number" step="0.1" min="1" max="6" />
+            </div>
+          </div>
+
+          <div class="field-row-2">
+            <div class="field">
+              <label for="sel-round-b"><span>Bulat Burden</span></label>
+              <select id="sel-round-b">
+                <option value="2">2 Desimal</option>
+                <option value="1">1 Desimal</option>
+                <option value="0">Bil. Bulat</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="sel-round-other"><span>Bulat S, J, T</span></label>
+              <select id="sel-round-other">
+                <option value="2">2 Desimal</option>
+                <option value="1">1 Desimal</option>
+                <option value="0">Bil. Bulat</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- SECTION 2: INTERACTIVE 3D VIEWPORT (PURE CANVAS 3D ENGINE)            -->
+    <!-- ===================================================================== -->
+    <section id="sec-3d" class="panel viewport-panel" aria-label="Viewport Desain Peledakan 3D">
+      <div class="viewport-toolbar">
+        <div class="btn-cluster">
+          <button type="button" class="btn btn-cam active" data-cam="iso">Isometric 3D</button>
+          <button type="button" class="btn btn-cam" data-cam="top">Tampak Atas</button>
+          <button type="button" class="btn btn-cam" data-cam="side">Potongan Samping</button>
+          <button type="button" class="btn btn-cam" data-cam="freeface">Bidang Bebas</button>
+        </div>
+
+        <div class="btn-cluster">
+          <button type="button" id="btn-zoom-in" class="btn">Zoom +</button>
+          <button type="button" id="btn-zoom-out" class="btn">Zoom -</button>
+          <button type="button" id="btn-toggle-xray" class="btn btn-active">X-Ray Batuan: ON</button>
+          <button type="button" id="btn-toggle-tieup" class="btn btn-active">Tie-Up &amp; Delay: ON</button>
+          <button type="button" id="btn-toggle-labels" class="btn btn-active">Dimensi: ON</button>
+          <button type="button" id="btn-toggle-flyrock" class="btn btn-active">Zona Flyrock: ON</button>
+        </div>
+      </div>
+
+      <!-- Single Borehole Cross-Section Profile Panel (Replaces Bench Slicer) -->
+      <div class="slicer-bar">
+        <div class="hole-profile-strip">
+          <div class="hole-diagram-wrap">
+            <canvas id="single-hole-canvas" width="130" height="150"></canvas>
+            <div style="flex: 1;">
+              <div style="font-size: 11.5px; font-weight: 800; color: var(--amber-light); margin-bottom: 6px;">
+                📐 Penampang Vertikal 1 Lubang Bor (Single Borehole Profile)
+              </div>
+              <div class="hole-specs-grid">
+                <div class="hole-spec-box">
+                  <span>1. Stemming (T)</span>
+                  <strong id="prof-t" style="color: #fbbf24;">8.00 ft</strong>
+                </div>
+                <div class="hole-spec-box">
+                  <span>2. Kolom Isian (PC)</span>
+                  <strong id="prof-pc" style="color: #fb923c;">40.15 ft</strong>
+                </div>
+                <div class="hole-spec-box">
+                  <span>3. Subdrilling (J)</span>
+                  <strong id="prof-j" style="color: #c4b5fd;">3.15 ft</strong>
+                </div>
+                <div class="hole-spec-box">
+                  <span>Total Kedalaman (H)</span>
+                  <strong id="prof-h" style="color: var(--cyan);">48.15 ft</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pure JavaScript 3D Canvas Stage -->
+      <div id="canvas-container" class="canvas-wrapper">
+        <canvas id="blast-canvas"></canvas>
+
+        <!-- Top-Left HUD: Flyrock Safety Zone & Tap-to-Inspect Hole Card -->
+        <div class="hud-top-left">
+          <div id="flyrock-hud" class="safety-card">
+            <div class="safety-title">
+              <span>🛡 Radius Flyrock &amp; Keamanan</span>
+              <span id="flyrock-radius-lbl" style="font-family: var(--font-mono); color: var(--cyan);">221 ft</span>
+            </div>
+            <div class="safety-row">
+              <span>Pemukiman (<span id="lbl-dist-pem">1,512 ft</span>):</span>
+              <span id="status-pem" class="badge-ok">AMAN</span>
+            </div>
+            <div class="safety-row">
+              <span>Infra Vital (<span id="lbl-dist-inf">689 ft</span>):</span>
+              <span id="status-inf" class="badge-ok">AMAN</span>
+            </div>
+          </div>
+
+          <!-- Tap-to-Inspect Hole HUD Card -->
+          <div id="inspect-card" class="inspect-card" role="region" aria-label="Detail Lubang Bor">
+            <div class="inspect-head">
+              <span id="insp-hole-title" class="inspect-title">Lubang #1 (Baris 1, Kolom 1)</span>
+              <button type="button" id="btn-close-inspect" class="inspect-close" title="Tutup">✕</button>
+            </div>
+            <div class="inspect-grid">
+              <div class="inspect-item">
+                <span>Waktu Delay</span>
+                <strong id="insp-hole-delay" style="color: var(--amber-light);">0 ms</strong>
+              </div>
+              <div class="inspect-item">
+                <span>Kedalaman Lubang (H)</span>
+                <strong id="insp-hole-h">48.16 ft</strong>
+              </div>
+              <div class="inspect-item">
+                <span>Stemming (T)</span>
+                <strong id="insp-hole-t" style="color: #fbbf24;">7.91 ft</strong>
+              </div>
+              <div class="inspect-item">
+                <span>Kolom Isian (PC)</span>
+                <strong id="insp-hole-pc" style="color: #fb923c;">40.26 ft</strong>
+              </div>
+              <div class="inspect-item">
+                <span>Subdrilling (J)</span>
+                <strong id="insp-hole-j" style="color: #c4b5fd;">3.16 ft</strong>
+              </div>
+              <div class="inspect-item">
+                <span>Berat BP / Lubang</span>
+                <strong id="insp-hole-wbp" style="color: var(--emerald);">452.6 lb</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top-Right Telemetry HUD -->
+        <div class="hud-telemetry">
+          <div class="lbl">Status Simulasi Peledakan</div>
+          <div id="hud-sim-status" class="val">SIAP LEDAK</div>
+          <div id="hud-hole-count" class="sub">6 Baris &bull; 88 Lubang</div>
+        </div>
+
+        <!-- Bottom Touch Hint & Blast Simulation Controls -->
+        <div class="hud-bottom">
+          <div class="touch-hint">
+            Geser 1 jari / Mouse: Putar 360&deg; &bull; Cubit / Scroll: Zoom &bull; Ketuk Lubang: Cek Detail
+          </div>
+
+          <div class="sim-controls">
+            <button type="button" id="btn-sim-blast" class="btn btn-blast">💥 Simulasi Peledakan</button>
+            <button type="button" id="btn-sim-reset" class="btn">↺ Reset Kondisi Awal</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Legend Bar Below 3D Canvas -->
+      <div class="legend-bar">
+        <div class="legend-items">
+          <span class="legend-item"><span class="swatch" style="background: #d97706;"></span>Stemming (T)</span>
+          <span class="legend-item"><span class="swatch" style="background: #f97316;"></span>Kolom Isian (PC)</span>
+          <span class="legend-item"><span class="swatch" style="background: #fde047;"></span>Primer Booster</span>
+          <span class="legend-item"><span class="swatch" style="background: #a855f7;"></span>Subdrilling (J)</span>
+          <span class="legend-item"><span class="swatch" style="background: #0f172a; border-color: #14b8a6;"></span>Bedrock Bawah Lantai (y &lt; 0)</span>
+          <span class="legend-item"><span class="swatch" style="background: #78716c;"></span>Muckpile (Hasil Ledakan)</span>
+        </div>
+        <span style="font-family: var(--font-mono); font-size: 10.5px; color: var(--cyan);">
+          Ketuk lubang bor mana saja untuk inspeksi
+        </span>
+      </div>
+
+      <!-- Quick KPI Summary Strip -->
+      <div class="kpi-grid">
+        <div class="kpi-box">
+          <div class="kpi-label">Burden (B)</div>
+          <div id="kpi-B" class="kpi-value" style="color: var(--amber);">15.81 ft</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">Spasi (S)</div>
+          <div id="kpi-S" class="kpi-value" style="color: var(--cyan);">18.97 ft</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">Stemming (T)</div>
+          <div id="kpi-T" class="kpi-value" style="color: var(--amber-light);">7.91 ft</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">Subdrilling (J)</div>
+          <div id="kpi-J" class="kpi-value" style="color: var(--violet);">3.16 ft</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">Kedalaman (H)</div>
+          <div id="kpi-H" class="kpi-value" style="color: #ffffff;">48.16 ft</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">Kolom Isian (PC)</div>
+          <div id="kpi-PC" class="kpi-value" style="color: var(--orange);">40.26 ft</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">Jumlah Lubang (N)</div>
+          <div id="kpi-N" class="kpi-value" style="color: var(--cyan);">88 lubang</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">Powder Factor (PF)</div>
+          <div id="kpi-PF" class="kpi-value" style="color: var(--emerald);">2.26 ton/lb</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- SECTION 3: STEP-BY-STEP CALCULATION BREAKDOWN CARDS (BAGIAN I.a - I.d)-->
+    <!-- ===================================================================== -->
+    <section id="sec-calc" class="panel" aria-labelledby="sec3-heading">
+      <div class="panel-header">
+        <div>
+          <span class="tag-pill" style="color: var(--cyan); border-color: rgba(34,211,238,0.35); background: rgba(34,211,238,0.12);">
+            Derivasi Rumus &amp; Hasil Teknis
+          </span>
+          <h2 id="sec3-heading" class="panel-title">Rincian Perhitungan Geometri Peledakan (Bagian I.a &ndash; I.d)</h2>
+        </div>
+
+        <div class="btn-cluster">
+          <button type="button" id="btn-toggle-formulas" class="btn btn-active">📖 Tampilkan Rumus: ON</button>
+          <div id="sr-badge" class="sr-pill">SR = 3.05 &bull; Baik &amp; Terkontrol</div>
+        </div>
+      </div>
+
+      <div class="results-grid">
+        <!-- I.a -->
+        <div class="result-card">
+          <div class="result-card-header">
+            <div class="result-sec-tag" style="color: var(--amber);">Target Shift &amp; Bagian I.a</div>
+            <div class="result-sec-title">Target Volume Shift, SG BP &amp; Adjustment Factor</div>
+          </div>
+          <div id="res-1a" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+
+        <!-- I.b -->
+        <div class="result-card">
+          <div class="result-card-header">
+            <div class="result-sec-tag" style="color: var(--cyan);">Bagian I.b</div>
+            <div class="result-sec-title">Geometri Peledakan &amp; Koreksi Volume</div>
+          </div>
+          <div id="res-1b" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+
+        <!-- I.c -->
+        <div class="result-card">
+          <div class="result-card-header">
+            <div class="result-sec-tag" style="color: var(--orange);">Bagian I.c</div>
+            <div class="result-sec-title">Kebutuhan Bahan Peledak, Powder Factor &amp; Blasting Ratio</div>
+          </div>
+          <div id="res-1c" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+
+        <!-- I.d -->
+        <div class="result-card">
+          <div class="result-card-header">
+            <div class="result-sec-tag" style="color: var(--emerald);">Bagian I.d</div>
+            <div class="result-sec-title">Stiffness Ratio (SR) &amp; Evaluasi Kinerja</div>
+          </div>
+          <div id="res-1d" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+      </div>
+
+      <!-- Hole-by-Hole Delay Schedule Preview Table -->
+      <div class="table-wrap">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px;">
+          <div>
+            <div class="result-sec-tag" style="color: var(--amber);">Jadwal Inisiasi &amp; Waktu Tunda</div>
+            <div class="result-sec-title">Tabel Urutan Detonasi Lubang Bor (Ketuk Baris untuk Sorot di 3D)</div>
+          </div>
+          <span id="lbl-max-delay" style="font-family: var(--font-mono); font-size: 11px; color: var(--cyan); font-weight: 800;">
+            Total Durasi Detonasi: 535 ms
+          </span>
+        </div>
+
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Lubang ID</th>
+                <th>Baris</th>
+                <th>Kolom</th>
+                <th>Delay (ms)</th>
+                <th>Kedalaman H</th>
+                <th>Stemming T</th>
+                <th>Isian PC</th>
+                <th>Berat BP</th>
+              </tr>
+            </thead>
+            <tbody id="delay-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <strong style="color: var(--amber);">KM Engineering Studio</strong> &mdash; Desain Peledakan Tambang Terbuka 3D &bull; Metode R.L. Ash
+  </footer>
+
+  <!-- ======================================================================= -->
+  <!-- SAVE NAMED SCENARIO MODAL (NO prompt() / alert())                       -->
+  <!-- ======================================================================= -->
+  <div id="save-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="save-modal-title">
+    <div class="modal-box">
+      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 9px;">
+        <h3 id="save-modal-title" style="font-size: 14px; font-weight: 800; color: #fff;">
+          Simpan Skenario Desain Peledakan
+        </h3>
+        <button type="button" id="btn-close-save-modal" class="btn" style="padding: 4px 9px;">✕</button>
+      </div>
+      <div class="field">
+        <label for="inp-scenario-name"><span>Nama Skenario (misal: Pit Utara - Batupasir Shift 1)</span></label>
+        <input id="inp-scenario-name" type="text" placeholder="Ketik nama skenario..." />
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button type="button" id="btn-cancel-save" class="btn">Batal</button>
+        <button type="button" id="btn-confirm-save" class="btn btn-primary">💾 Simpan ke Perangkat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Banner -->
+  <div id="toast-box" class="toast">
+    <span>⚡</span>
+    <span id="toast-msg">Desain 3D diperbarui</span>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- PURE JAVASCRIPT ENGINE: R.L. ASH CALCULATOR + 3D PERSPECTIVE RENDERER   -->
+  <!-- ======================================================================= -->
+  <script>
+    (function () {
+      'use strict';
+
+      // =======================================================================
+      // 1. CONSTANTS, UNIT CONVERSIONS & DEFAULT ENGINEERING PARAMETERS
+      // =======================================================================
+      const STORAGE_AUTOSAVE = 'km_blast_autosave_v2';
+      const STORAGE_SCENARIOS = 'km_blast_scenarios_v2';
+
+      const CONV = {
+        FT_TO_M: 0.3048,
+        IN_TO_MM: 25.4,
+        BCF_TO_M3: 0.0283168466,
+        LBFT3_TO_KGM3: 16.0184634,
+        FPS_TO_MS: 0.3048,
+        LB_TO_KG: 0.45359237
+      };
+
+      const DEFAULTS = {
+        // Card 1: Data Produksi
+        target_type: 'volume', // 'volume' (bcf/m3) or 'ton' (ton/bln)
+        target_ob_bcf: 50000000,
+        target_ob_ton: 2500000,
+        hari_kerja: 25,
+        frekuensi: 2,
+        mining_losses: 10,
+        // Card 2: Geoteknik & Dimensi Pit
+        H_lereng_ft: 45,
+        w_mode: 'manual', // 'manual' or 'formula' (Row * B)
+        W_lereng_ft: 90,
+        rho_rock_lbft3: 165,
+        rho_std_lbft3: 160,
+        dist_pemukiman_ft: 461 / 0.3048,
+        dist_infra_ft: 210 / 0.3048,
+        // Card 3: Alat Bor, Pola & Delay
+        De_in: 6,
+        pattern: 'rectangular',
+        blast_seq: 'corner_cut', // 'corner_cut', 'box_cut', 'v_cut', 'hole_by_hole', 'row_by_row'
+        face_angle_deg: 90,
+        hole_inc_deg: 0,
+        delay_hole_ms: 25,
+        delay_row_ms: 42,
+        // Card 4: Bahan Peledak
+        sg_mode: 'formula', // 'formula' (141/CC) or 'manual'
+        sg_direct: 0.85,
+        CC: 152,
+        VOD_fps: 15000,
+        SG_std: 1.2,
+        VOD_std_fps: 12000,
+        // Card 5: Rasio Geometri & Pembulatan R.L. Ash
+        KB_std: 30,
+        KS: 1.2,
+        KJ: 0.2,
+        KT: 0.5,
+        row_mode: 'ceil', // 'ceil' (Math.ceil(W/B)) or 'manual'
+        row_manual: 6,
+        h_mode: 'bench_plus_j', // 'bench_plus_j' or 'kh_burden'
+        Kh: 3.0,
+        round_b: 2,
+        round_other: 2
+      };
+
+      const state = {
+        unit: 'imperial',
+        xray: true,
+        showTieUp: true,
+        showLabels: true,
+        showFlyrock: true,
+        showFormulas: true,
+        selectedHoleId: null,
+        ...DEFAULTS
+      };
+
+      let calc = {};
+      let cachedHoles = [];
+
+      // =======================================================================
+      // 2. DOM REFERENCES & HELPERS
+      // =======================================================================
+      const $ = (id) => document.getElementById(id);
+
+      const dom = {
+        unitBtns: document.querySelectorAll('.unit-btn'),
+        formulaModeBtns: document.querySelectorAll('.formula-mode-btn'),
+        navTabs: document.querySelectorAll('.nav-tab'),
+        secInput: $('sec-input'),
+        sec3d: $('sec-3d'),
+        secCalc: $('sec-calc'),
+        lblUnitBanner: $('lbl-unit-banner'),
+        btnExportPng: $('btn-export-png'),
+        btnExportCsv: $('btn-export-csv'),
+        btnPrintPdf: $('btn-print-pdf'),
+        btnResetDefault: $('btn-reset-default'),
+        btnRecalc3d: $('btn-recalc-3d'),
+        // Scenario Manager
+        selectScenario: $('select-scenario'),
+        btnOpenSaveModal: $('btn-open-save-modal'),
+        btnLoadScenario: $('btn-load-scenario'),
+        btnDeleteScenario: $('btn-delete-scenario'),
+        saveModal: $('save-modal'),
+        btnCloseSaveModal: $('btn-close-save-modal'),
+        btnCancelSave: $('btn-cancel-save'),
+        btnConfirmSave: $('btn-confirm-save'),
+        inpScenarioName: $('inp-scenario-name'),
+        // Inputs
+        selTargetType: $('sel-target-type'),
+        inpTargetOb: $('inp-target-ob'),
+        uOb: $('u-ob'),
+        inpHari: $('inp-hari'),
+        inpFrek: $('inp-frek'),
+        inpLosses: $('inp-losses'),
+        inpHlereng: $('inp-hlereng'),
+        selWMode: $('sel-w-mode'),
+        inpWlereng: $('inp-wlereng'),
+        inpPjAuto: $('inp-pj-auto'),
+        inpRhobat: $('inp-rhobat'),
+        inpRhostd: $('inp-rhostd'),
+        inpDistPemukiman: $('inp-dist-pemukiman'),
+        inpDistInfra: $('inp-dist-infra'),
+        inpDe: $('inp-de'),
+        uDe: $('u-de'),
+        lblDeConv: $('lbl-de-conv'),
+        selBlastSeq: $('sel-blast-seq'),
+        patternBtns: document.querySelectorAll('.pattern-btn'),
+        inpFaceAngle: $('inp-face-angle'),
+        inpHoleInc: $('inp-hole-inc'),
+        inpDelayHole: $('inp-delay-hole'),
+        inpDelayRow: $('inp-delay-row'),
+        selSgMode: $('sel-sg-mode'),
+        inpSgDirect: $('inp-sg-direct'),
+        inpCc: $('inp-cc'),
+        inpSgstd: $('inp-sgstd'),
+        inpVod: $('inp-vod'),
+        inpVodstd: $('inp-vodstd'),
+        inpKbstd: $('inp-kbstd'),
+        inpKs: $('inp-ks'),
+        inpKj: $('inp-kj'),
+        inpKt: $('inp-kt'),
+        selRowMode: $('sel-row-mode'),
+        inpRowManual: $('inp-row-manual'),
+        selHMode: $('sel-h-mode'),
+        inpKh: $('inp-kh'),
+        selRoundB: $('sel-round-b'),
+        selRoundOther: $('sel-round-other'),
+        // 3D Viewport & Single Hole Profile
+        canvasWrapper: $('canvas-container'),
+        canvas: $('blast-canvas'),
+        singleHoleCanvas: $('single-hole-canvas'),
+        profT: $('prof-t'),
+        profPc: $('prof-pc'),
+        profJ: $('prof-j'),
+        profH: $('prof-h'),
+        camBtns: document.querySelectorAll('.btn-cam'),
+        btnZoomIn: $('btn-zoom-in'),
+        btnZoomOut: $('btn-zoom-out'),
+        btnToggleXray: $('btn-toggle-xray'),
+        btnToggleTieup: $('btn-toggle-tieup'),
+        btnToggleLabels: $('btn-toggle-labels'),
+        btnToggleFlyrock: $('btn-toggle-flyrock'),
+        btnToggleFormulas: $('btn-toggle-formulas'),
+        hudSimStatus: $('hud-sim-status'),
+        hudHoleCount: $('hud-hole-count'),
+        btnSimBlast: $('btn-sim-blast'),
+        btnSimReset: $('btn-sim-reset'),
+        // Flyrock & Tap-to-Inspect HUD Elements
+        flyrockHud: $('flyrock-hud'),
+        flyrockRadiusLbl: $('flyrock-radius-lbl'),
+        lblDistPem: $('lbl-dist-pem'),
+        lblDistInf: $('lbl-dist-inf'),
+        statusPem: $('status-pem'),
+        statusInf: $('status-inf'),
+        inspectCard: $('inspect-card'),
+        inspHoleTitle: $('insp-hole-title'),
+        inspHoleDelay: $('insp-hole-delay'),
+        inspHoleH: $('insp-hole-h'),
+        inspHoleT: $('insp-hole-t'),
+        inspHolePc: $('insp-hole-pc'),
+        inspHoleJ: $('insp-hole-j'),
+        inspHoleWbp: $('insp-hole-wbp'),
+        btnCloseInspect: $('btn-close-inspect'),
+        // Results & Table
+        srBadge: $('sr-badge'),
+        res1a: $('res-1a'),
+        res1b: $('res-1b'),
+        res1c: $('res-1c'),
+        res1d: $('res-1d'),
+        lblMaxDelay: $('lbl-max-delay'),
+        delayTableBody: $('delay-table-body'),
+        toastBox: $('toast-box'),
+        toastMsg: $('toast-msg')
+      };
+
+      function fmt(n, dec = 2) {
+        if (!isFinite(n)) return '0';
+        return Number(n).toLocaleString('en-US', {
+          minimumFractionDigits: dec,
+          maximumFractionDigits: dec
+        });
+      }
+
+      let toastTimer = null;
+      function showToast(text) {
+        dom.toastMsg.textContent = text;
+        dom.toastBox.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => dom.toastBox.classList.remove('show'), 2400);
+      }
+
+      // =======================================================================
+      // 3. LOCALSTORAGE AUTO-SAVE & NAMED SCENARIO MANAGER
+      // =======================================================================
+      function autoSaveState() {
+        try {
+          const payload = {};
+          Object.keys(DEFAULTS).forEach(k => { payload[k] = state[k]; });
+          payload.unit = state.unit;
+          payload.showFormulas = state.showFormulas;
+          payload.slicePct = state.slicePct;
+          localStorage.setItem(STORAGE_AUTOSAVE, JSON.stringify(payload));
+        } catch (e) { /* Ignore storage quota errors */ }
+      }
+
+      function loadAutoSavedState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_AUTOSAVE);
+          if (!raw) return;
+          const saved = JSON.parse(raw);
+          Object.keys(DEFAULTS).forEach(k => {
+            if (saved[k] !== undefined) state[k] = saved[k];
+          });
+          if (saved.unit === 'imperial' || saved.unit === 'metric') state.unit = saved.unit;
+          if (typeof saved.showFormulas === 'boolean') state.showFormulas = saved.showFormulas;
+          if (typeof saved.slicePct === 'number') state.slicePct = saved.slicePct;
+        } catch (e) { /* Ignore parse errors */ }
+      }
+
+      function getSavedScenarios() {
+        try {
+          return JSON.parse(localStorage.getItem(STORAGE_SCENARIOS) || '{}');
+        } catch (e) {
+          return {};
+        }
+      }
+
+      function refreshScenarioDropdown(selectedName = '') {
+        const scenarios = getSavedScenarios();
+        const names = Object.keys(scenarios);
+        dom.selectScenario.innerHTML = '<option value="">-- Pilih Skenario (' + names.length + ') --</option>';
+        names.forEach(name => {
+          const opt = document.createElement('option');
+          opt.value = name;
+          opt.textContent = name;
+          if (name === selectedName) opt.selected = true;
+          dom.selectScenario.appendChild(opt);
+        });
+      }
+
+      // =======================================================================
+      // 4. SYNC INPUTS WITH ACTIVE UNIT SYSTEM (IMPERIAL ft <-> METRIK m)
+      // =======================================================================
+      function syncInputsFromState() {
+        const isM = state.unit === 'metric';
+
+        dom.unitBtns.forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.unit === state.unit);
+        });
+
+        dom.lblUnitBanner.textContent = isM
+          ? 'Satuan: Metrik (m, mm, kg, m³, m/s)'
+          : 'Satuan: Imperial (ft, inci, lb, bcf, fps)';
+
+        dom.selTargetType.value = state.target_type;
+        if (state.target_type === 'ton') {
+          dom.uOb.textContent = 'ton/bln';
+          dom.inpTargetOb.value = state.target_ob_ton;
+        } else {
+          dom.uOb.textContent = isM ? 'm³/bln' : 'bcf/bln';
+          dom.inpTargetOb.value = isM ? Number((state.target_ob_bcf * CONV.BCF_TO_M3).toFixed(2)) : state.target_ob_bcf;
+        }
+
+        dom.uDe.textContent = isM ? 'mm' : 'inci';
+        document.querySelectorAll('.u-len').forEach(el => el.textContent = isM ? 'm' : 'ft');
+        document.querySelectorAll('.u-dens').forEach(el => el.textContent = isM ? 'kg/m³' : 'lb/ft³');
+        document.querySelectorAll('.u-vel').forEach(el => el.textContent = isM ? 'm/s' : 'fps');
+
+        dom.inpHari.value = state.hari_kerja;
+        dom.inpFrek.value = state.frekuensi;
+        dom.inpLosses.value = state.mining_losses;
+
+        dom.inpHlereng.value = isM ? Number((state.H_lereng_ft * CONV.FT_TO_M).toFixed(2)) : state.H_lereng_ft;
+        dom.selWMode.value = state.w_mode;
+        dom.inpWlereng.disabled = state.w_mode === 'formula';
+        dom.inpWlereng.value = isM ? Number((state.W_lereng_ft * CONV.FT_TO_M).toFixed(2)) : state.W_lereng_ft;
+
+        dom.inpRhobat.value = isM ? Number((state.rho_rock_lbft3 * CONV.LBFT3_TO_KGM3).toFixed(2)) : state.rho_rock_lbft3;
+        dom.inpRhostd.value = isM ? Number((state.rho_std_lbft3 * CONV.LBFT3_TO_KGM3).toFixed(2)) : state.rho_std_lbft3;
+        dom.inpDistPemukiman.value = isM ? Number((state.dist_pemukiman_ft * CONV.FT_TO_M).toFixed(2)) : Number(state.dist_pemukiman_ft.toFixed(2));
+        dom.inpDistInfra.value = isM ? Number((state.dist_infra_ft * CONV.FT_TO_M).toFixed(2)) : Number(state.dist_infra_ft.toFixed(2));
+
+        dom.inpDe.value = isM ? Number((state.De_in * CONV.IN_TO_MM).toFixed(2)) : state.De_in;
+        dom.lblDeConv.textContent = isM
+          ? `= ${((state.De_in * CONV.IN_TO_MM) / 1000).toFixed(3)} m`
+          : `= ${(state.De_in / 12).toFixed(3)} ft`;
+
+        dom.selBlastSeq.value = state.blast_seq;
+        dom.patternBtns.forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.pattern === state.pattern);
+        });
+
+        dom.inpFaceAngle.value = state.face_angle_deg;
+        dom.inpHoleInc.value = state.hole_inc_deg;
+        dom.inpDelayHole.value = state.delay_hole_ms;
+        dom.inpDelayRow.value = state.delay_row_ms;
+
+        dom.selSgMode.value = state.sg_mode;
+        dom.inpSgDirect.disabled = state.sg_mode === 'formula';
+        dom.inpCc.disabled = state.sg_mode === 'manual';
+        dom.inpSgDirect.value = state.sg_direct;
+        dom.inpCc.value = state.CC;
+        dom.inpSgstd.value = state.SG_std;
+        dom.inpVod.value = isM ? Number((state.VOD_fps * CONV.FPS_TO_MS).toFixed(1)) : state.VOD_fps;
+        dom.inpVodstd.value = isM ? Number((state.VOD_std_fps * CONV.FPS_TO_MS).toFixed(1)) : state.VOD_std_fps;
+
+        dom.inpKbstd.value = state.KB_std;
+        dom.inpKs.value = state.KS;
+        dom.inpKj.value = state.KJ;
+        dom.inpKt.value = state.KT;
+
+        dom.selRowMode.value = state.row_mode;
+        dom.inpRowManual.disabled = state.row_mode === 'ceil';
+        dom.inpRowManual.value = state.row_manual;
+
+        dom.selHMode.value = state.h_mode;
+        dom.inpKh.disabled = state.h_mode === 'bench_plus_j';
+        dom.inpKh.value = state.Kh;
+
+        dom.selRoundB.value = state.round_b;
+        dom.selRoundOther.value = state.round_other;
+      }
+
+      function roundTo(val, decimals) {
+        const factor = Math.pow(10, decimals);
+        return Math.round(val * factor) / factor;
+      }
+
+      // =======================================================================
+      // 5. EXACT R.L. ASH BLASTING FORMULAS (BAGIAN I.a - I.d)
+      // =======================================================================
+      function calculateBlastingDesign() {
+        const isM = state.unit === 'metric';
+        const fL = isM ? CONV.FT_TO_M : 1;
+        const fV = isM ? CONV.BCF_TO_M3 : 1;
+        const fW = isM ? CONV.LB_TO_KG : 1;
+        const fD = isM ? CONV.LBFT3_TO_KGM3 : 1;
+        const fVel = isM ? CONV.FPS_TO_MS : 1;
+
+        const hari = Math.max(1, state.hari_kerja);
+        const frek = Math.max(1, state.frekuensi);
+        const losses = Math.max(0, state.mining_losses);
+
+        const H_lereng_ft = Math.max(3, state.H_lereng_ft);
+        const rho_rock_imp = Math.max(10, state.rho_rock_lbft3);
+        const rho_std_imp = Math.max(10, state.rho_std_lbft3);
+        const dist_pemukiman_ft = Math.max(1, state.dist_pemukiman_ft);
+        const dist_infra_ft = Math.max(1, state.dist_infra_ft);
+
+        // Convert Target OB from Ton/bln if selected
+        let effective_target_ob_bcf = Math.max(100, state.target_ob_bcf);
+        if (state.target_type === 'ton') {
+          const tonPerMonth = Math.max(100, state.target_ob_ton);
+          effective_target_ob_bcf = (tonPerMonth * 2000) / rho_rock_imp;
+        }
+
+        const De_in = Math.max(0.5, state.De_in);
+        const De_ft = De_in / 12;
+        const face_angle_deg = Math.max(65, Math.min(90, state.face_angle_deg));
+        const hole_inc_deg = Math.max(0, Math.min(25, state.hole_inc_deg));
+        const alpha_rad = (hole_inc_deg * Math.PI) / 180;
+        const beta_rad = (face_angle_deg * Math.PI) / 180;
+
+        const CC = Math.max(20, state.CC);
+        const VOD_fps = Math.max(500, state.VOD_fps);
+        const SG_std = Math.max(0.1, state.SG_std);
+        const VOD_std_fps = Math.max(500, state.VOD_std_fps);
+
+        const KB_std = Math.max(5, state.KB_std);
+        const KS = Math.max(0.2, state.KS);
+        const KJ = Math.max(0, state.KJ);
+        const KT = Math.max(0, state.KT);
+
+        // Target Volume per Shift
+        const V_target_bcf = (effective_target_ob_bcf / (hari * frek)) * (1 + losses / 100);
+
+        // I.a Rasio Geometri & Adjustment Factor
+        const SG_BP = state.sg_mode === 'manual' ? Math.max(0.3, state.sg_direct) : (141 / CC);
+        const AF1 = Math.cbrt((SG_BP * VOD_fps * VOD_fps) / (SG_std * VOD_std_fps * VOD_std_fps));
+        const AF2 = Math.cbrt(rho_std_imp / rho_rock_imp);
+        const KB = KB_std * AF1 * AF2;
+
+        // I.b Geometri Peledakan dengan Pembulatan Terkontrol
+        const rB = Number(state.round_b);
+        const rO = Number(state.round_other);
+
+        const B_raw_disp = ((De_in * KB) / 12) * fL;
+        const B_disp = roundTo(B_raw_disp, rB);
+        const B_ft = B_disp / fL;
+
+        // Jumlah Row (Pembulatan ke atas W/B atau pilih sendiri)
+        let W_lereng_ft = Math.max(5, state.W_lereng_ft);
+        let Row = 1;
+        if (state.row_mode === 'manual') {
+          Row = Math.max(1, Math.round(state.row_manual));
+        } else {
+          Row = Math.max(1, Math.ceil(W_lereng_ft / B_ft));
+        }
+
+        // Lebar Lereng (Manual atau Row * B)
+        if (state.w_mode === 'formula') {
+          W_lereng_ft = Row * B_ft;
+          dom.inpWlereng.value = Number((W_lereng_ft * fL).toFixed(2));
+        }
+
+        const S_disp = roundTo((KS * B_ft) * fL, rO);
+        const J_disp = roundTo((KJ * B_ft) * fL, rO);
+        const T_disp = roundTo((KT * B_ft) * fL, rO);
+
+        const S_ft = S_disp / fL;
+        const J_ft = J_disp / fL;
+        const T_ft = T_disp / fL;
+
+        // Kedalaman Lubang H (H_lereng + J atau Kh * Burden)
+        let H_raw_ft = (H_lereng_ft / Math.cos(alpha_rad)) + J_ft;
+        if (state.h_mode === 'kh_burden') {
+          H_raw_ft = Math.max(1, state.Kh) * B_ft;
+        }
+        const H_disp = roundTo(H_raw_ft * fL, rO);
+        const H_ft = H_disp / fL;
+        const PC_disp = Math.max(0, roundTo(H_disp - T_disp, rO));
+        const PC_ft = PC_disp / fL;
+
+        // Panjang Lereng Awal = Volume / (Lebar x Tinggi)
+        const Pj_ft = V_target_bcf / (W_lereng_ft * H_lereng_ft);
+        dom.inpPjAuto.value = fmt(Pj_ft * fL, 2);
+
+        const N = Math.max(Row, Math.round(((Pj_ft - 2 * B_ft) / S_ft + 2) * Row));
+        const Pj_koreksi_ft = 2 * B_ft + ((N / Row) - 2) * S_ft;
+        const V_koreksi_bcf = Pj_koreksi_ft * W_lereng_ft * H_lereng_ft;
+
+        // I.c Kebutuhan Bahan Peledak, Powder Factor & Blasting Ratio
+        const V_BP_hole_ft3 = ((Math.PI * De_ft * De_ft) / 4) * PC_ft;
+        const V_BP_total_ft3 = N * V_BP_hole_ft3;
+        const rho_BP_lbft3 = SG_BP * 62.428;
+        const W_BP_hole_lb = V_BP_hole_ft3 * rho_BP_lbft3;
+        const W_BP_total_lb = V_BP_total_ft3 * rho_BP_lbft3;
+        const W_batuan_short_ton = (V_koreksi_bcf * rho_rock_imp) / 2000;
+        const PF_imp = W_BP_total_lb > 0 ? W_batuan_short_ton / W_BP_total_lb : 0;
+        const BR_imp = V_koreksi_bcf > 0 ? W_BP_total_lb / V_koreksi_bcf : 0;
+
+        // I.d Stiffness Ratio
+        const SR = B_ft > 0 ? H_ft / B_ft : 0;
+
+        // Empirical Flyrock Radius Estimation
+        const confinementRatio = Math.max(0.18, T_ft / Math.max(1, B_ft));
+        const flyrock_ft = 260 * Math.pow(De_ft, 2 / 3) * (0.68 / confinementRatio);
+
+        const V_koreksi_disp = V_koreksi_bcf * fV;
+        const rho_rock_disp = rho_rock_imp * fD;
+        const W_BP_total_disp = W_BP_total_lb * fW;
+        const W_batuan_disp = isM
+          ? (V_koreksi_disp * rho_rock_disp) / 1000
+          : W_batuan_short_ton;
+        const PF_disp = W_BP_total_disp > 0 ? W_batuan_disp / W_BP_total_disp : 0;
+        const BR_disp = V_koreksi_disp > 0 ? W_BP_total_disp / V_koreksi_disp : 0;
+
+        calc = {
+          isM,
+          uLen: isM ? 'm' : 'ft',
+          uDia: isM ? 'mm' : 'inci',
+          uVol: isM ? 'm³' : 'bcf',
+          uMass: isM ? 'kg' : 'lb',
+          uDens: isM ? 'kg/m³' : 'lb/ft³',
+          uVel: isM ? 'm/s' : 'fps',
+          uPF: isM ? 'ton/kg' : 'ton/lb',
+          uBR: isM ? 'kg/m³' : 'lb/bcf',
+          H_lereng_ft, W_lereng_ft, B_ft, S_ft, J_ft, T_ft, H_ft, PC_ft, Pj_ft, Pj_koreksi_ft, De_ft,
+          face_angle_deg, hole_inc_deg, alpha_rad, beta_rad,
+          dist_pemukiman_ft, dist_infra_ft, flyrock_ft,
+          SG_BP, AF1, AF2, KB, Row, N, SR,
+          target_ob: effective_target_ob_bcf * fV,
+          V_target: V_target_bcf * fV,
+          H_lereng: H_lereng_ft * fL,
+          W_lereng: W_lereng_ft * fL,
+          De_disp: isM ? De_in * CONV.IN_TO_MM : De_in,
+          VOD_disp: VOD_fps * fVel,
+          VOD_std_disp: VOD_std_fps * fVel,
+          rho_rock: rho_rock_disp,
+          rho_std: rho_std_imp * fD,
+          dist_pemukiman: dist_pemukiman_ft * fL,
+          dist_infra: dist_infra_ft * fL,
+          flyrock: flyrock_ft * fL,
+          B: B_disp,
+          S: S_disp,
+          J: J_disp,
+          T: T_disp,
+          H: H_disp,
+          PC: PC_disp,
+          Pj: Pj_ft * fL,
+          Pj_koreksi: Pj_koreksi_ft * fL,
+          V_koreksi: V_koreksi_disp,
+          V_BP_hole: V_BP_hole_ft3 * fV,
+          V_BP_total: V_BP_total_ft3 * fV,
+          rho_BP: rho_BP_lbft3 * fD,
+          W_BP_hole: W_BP_hole_lb * fW,
+          W_BP_total: W_BP_total_disp,
+          W_batuan: W_batuan_disp,
+          PF: PF_disp,
+          BR: BR_disp
+        };
+
+        dom.lblDeConv.textContent = isM
+          ? `= ${(calc.De_disp / 1000).toFixed(3)} m`
+          : `= ${De_ft.toFixed(3)} ft`;
+
+        renderSingleHoleProfile();
+        renderResultsUI();
+      }
+
+      // =======================================================================
+      // 5B. SINGLE BOREHOLE PROFILE 2D DIAGRAM RENDERER
+      // =======================================================================
+      function renderSingleHoleProfile() {
+        const c = calc;
+        dom.profT.textContent = `${fmt(c.T, 2)} ${c.uLen}`;
+        dom.profPc.textContent = `${fmt(c.PC, 2)} ${c.uLen}`;
+        dom.profJ.textContent = `${fmt(c.J, 2)} ${c.uLen}`;
+        dom.profH.textContent = `${fmt(c.H, 2)} ${c.uLen}`;
+
+        const cvs = dom.singleHoleCanvas;
+        if (!cvs) return;
+        const ctx = cvs.getContext('2d');
+        const W = cvs.width;
+        const H = cvs.height;
+        ctx.clearRect(0, 0, W, H);
+
+        const padTop = 16;
+        const padBot = 14;
+        const drawH = H - padTop - padBot;
+        const totalH = Math.max(1, c.H_ft);
+        const pxPerFt = drawH / totalH;
+
+        const tH = c.T_ft * pxPerFt;
+        const pcH = c.PC_ft * pxPerFt;
+        const jH = c.J_ft * pxPerFt;
+        const floorY = padTop + (c.H_lereng_ft * pxPerFt);
+
+        // Rock & Bedrock Background
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(14, padTop, W - 28, Math.max(0, floorY - padTop));
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(14, floorY, W - 28, Math.max(0, H - padBot - floorY));
+
+        // Floor Line (y = 0)
+        ctx.strokeStyle = '#14b8a6';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 3]);
+        ctx.beginPath();
+        ctx.moveTo(10, floorY);
+        ctx.lineTo(W - 10, floorY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        const colX = 42;
+        const colW = 24;
+
+        // Stemming (T)
+        ctx.fillStyle = '#d97706';
+        ctx.fillRect(colX, padTop, colW, tH);
+
+        // Explosive Column (PC)
+        ctx.fillStyle = '#f97316';
+        ctx.fillRect(colX, padTop + tH, colW, pcH);
+
+        // Primer at bottom of PC
+        const primH = Math.min(pcH, 7);
+        ctx.fillStyle = '#fde047';
+        ctx.fillRect(colX, padTop + tH + pcH - primH, colW, primH);
+
+        // Subdrilling highlight border (J)
+        if (jH > 0) {
+          ctx.strokeStyle = '#a855f7';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(colX - 1, H - padBot - jH, colW + 2, jH);
+        }
+
+        // Borehole Casing Outline
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 1.2;
+        ctx.strokeRect(colX, padTop, colW, drawH);
+
+        // Labels on right side
+        ctx.font = '700 9.5px ui-monospace, Menlo, Consolas, monospace';
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#fbbf24';
+        ctx.fillText(`T:${fmt(c.T, 1)}`, colX + colW + 6, padTop + Math.max(9, tH * 0.55));
+        ctx.fillStyle = '#fb923c';
+        ctx.fillText(`PC:${fmt(c.PC, 1)}`, colX + colW + 6, padTop + tH + Math.max(10, pcH * 0.5));
+        ctx.fillStyle = '#c4b5fd';
+        ctx.fillText(`J:${fmt(c.J, 1)}`, colX + colW + 6, H - padBot - 2);
+      }
+
+      // =======================================================================
+      // 6. RENDER KPI CARDS, FORMULA DERIVATIONS & DELAY SCHEDULE TABLE
+      // =======================================================================
+      function formulaRowHTML(name, eq, sub, val, highlight = false) {
+        const hideCls = state.showFormulas ? '' : 'hidden-formula';
+        return `
+          <div class="formula-item ${highlight ? 'highlight' : ''}">
+            <div>
+              <div class="f-name">${name}</div>
+              <div class="f-eq ${hideCls}">${eq}</div>
+              <div class="f-sub ${hideCls}">${sub}</div>
+            </div>
+            <div class="f-val">${val}</div>
+          </div>
+        `;
+      }
+
+      function renderResultsUI() {
+        const c = calc;
+
+        // KPI Strip
+        $('kpi-B').textContent = `${fmt(c.B, 2)} ${c.uLen}`;
+        $('kpi-S').textContent = `${fmt(c.S, 2)} ${c.uLen}`;
+        $('kpi-T').textContent = `${fmt(c.T, 2)} ${c.uLen}`;
+        $('kpi-J').textContent = `${fmt(c.J, 2)} ${c.uLen}`;
+        $('kpi-H').textContent = `${fmt(c.H, 2)} ${c.uLen}`;
+        $('kpi-PC').textContent = `${fmt(c.PC, 2)} ${c.uLen}`;
+        $('kpi-N').textContent = `${c.N} lubang`;
+        $('kpi-PF').textContent = `${fmt(c.PF, 2)} ${c.uPF}`;
+        dom.hudHoleCount.textContent = `${c.Row} Baris • ${c.N} Lubang`;
+
+        // Flyrock HUD Safety Comparison
+        dom.flyrockRadiusLbl.textContent = `${fmt(c.flyrock, 1)} ${c.uLen}`;
+        dom.lblDistPem.textContent = `${fmt(c.dist_pemukiman, 0)} ${c.uLen}`;
+        dom.lblDistInf.textContent = `${fmt(c.dist_infra, 0)} ${c.uLen}`;
+
+        const safePem = c.flyrock < c.dist_pemukiman;
+        const safeInf = c.flyrock < c.dist_infra;
+        dom.statusPem.className = safePem ? 'badge-ok' : 'badge-warn';
+        dom.statusPem.textContent = safePem ? 'AMAN' : 'WASPADA';
+        dom.statusInf.className = safeInf ? 'badge-ok' : 'badge-warn';
+        dom.statusInf.textContent = safeInf ? 'AMAN' : 'WASPADA';
+
+        // Bagian I.a
+        dom.res1a.innerHTML = [
+          formulaRowHTML(
+            'Target Volume Shift (V_target)',
+            'V_target = (Target_OB / (Hari × Frek)) × (1 + Losses/100)',
+            `(${fmt(c.target_ob, 0)} / (${state.hari_kerja} × ${state.frekuensi})) × (1 + ${state.mining_losses}/100)`,
+            `${fmt(c.V_target, 0)} ${c.uVol}`,
+            true
+          ),
+          formulaRowHTML(
+            'Berat Jenis Bahan Peledak (SG_BP)',
+            state.sg_mode === 'manual' ? 'SG_BP = Input Langsung' : 'SG_BP = 141 / CC',
+            state.sg_mode === 'manual' ? `Input Manual = ${fmt(c.SG_BP, 3)}` : `141 / ${state.CC}`,
+            `${fmt(c.SG_BP, 4)}`
+          ),
+          formulaRowHTML(
+            'Adjustment Factor 1 (AF1)',
+            'AF1 = ((SG_BP × VOD²) / (SG_std × VOD_std²))^(1/3)',
+            `((${fmt(c.SG_BP, 3)} × ${fmt(c.VOD_disp, 0)}²) / (${state.SG_std} × ${fmt(c.VOD_std_disp, 0)}²))^(1/3)`,
+            `${fmt(c.AF1, 4)}`
+          ),
+          formulaRowHTML(
+            'Adjustment Factor 2 (AF2)',
+            'AF2 = (rho_std / rho_rock)^(1/3)',
+            `(${fmt(c.rho_std, 1)} / ${fmt(c.rho_rock, 1)})^(1/3)`,
+            `${fmt(c.AF2, 4)}`
+          ),
+          formulaRowHTML(
+            'Burden Ratio (KB)',
+            'KB = KB_std × AF1 × AF2',
+            `${state.KB_std} × ${fmt(c.AF1, 3)} × ${fmt(c.AF2, 3)}`,
+            `${fmt(c.KB, 2)}`,
+            true
+          )
+        ].join('');
+
+        // Bagian I.b
+        dom.res1b.innerHTML = [
+          formulaRowHTML(
+            'Burden (B) & Jumlah Baris (Row)',
+            state.row_mode === 'ceil' ? 'B = (De × KB) / 12  |  Row = ceil(W / B)' : 'B = (De × KB) / 12  |  Row = Input Sendiri',
+            `W = ${fmt(c.W_lereng, 2)} ${c.uLen} / ${fmt(c.B, 2)} ${c.uLen}`,
+            `B = ${fmt(c.B, 2)} ${c.uLen} (${c.Row} baris)`,
+            true
+          ),
+          formulaRowHTML(
+            'Spasi (S) & Subdrilling (J)',
+            'S = KS × B  |  J = KJ × B',
+            `S = ${state.KS} × ${fmt(c.B, 2)}  |  J = ${state.KJ} × ${fmt(c.B, 2)}`,
+            `S = ${fmt(c.S, 2)} ${c.uLen} | J = ${fmt(c.J, 2)} ${c.uLen}`
+          ),
+          formulaRowHTML(
+            'Stemming (T), Kedalaman (H) & Kolom Isian (PC)',
+            state.h_mode === 'kh_burden' ? 'T = KT × B  |  H = Kh × B  |  PC = H - T' : `T = KT × B  |  H = (H_lereng / cos ${state.hole_inc_deg}°) + J  |  PC = H - T`,
+            `T = ${fmt(c.T, 2)} | H = ${fmt(c.H, 2)} | PC = ${fmt(c.PC, 2)}`,
+            `H = ${fmt(c.H, 2)} ${c.uLen} | PC = ${fmt(c.PC, 2)} ${c.uLen}`
+          ),
+          formulaRowHTML(
+            'Panjang Lereng Awal (Pj) & Jumlah Lubang (N)',
+            'Pj = V_target / (W × H_lereng)  |  N = round(((Pj - 2B)/S + 2) × Row)',
+            `Pj = ${fmt(c.Pj, 2)} ${c.uLen} | Pola: ${state.pattern === 'staggered' ? 'Staggered' : 'Rectangular'}`,
+            `${c.N} lubang`
+          ),
+          formulaRowHTML(
+            'Panjang Lereng Koreksi & Volume Koreksi',
+            'Pj_koreksi = 2B + (N/Row - 2) × S  |  V_koreksi = Pj_koreksi × W × H_lereng',
+            `${fmt(c.Pj_koreksi, 2)} ${c.uLen} × ${fmt(c.W_lereng, 1)} × ${fmt(c.H_lereng, 1)}`,
+            `${fmt(c.V_koreksi, 0)} ${c.uVol}`,
+            true
+          )
+        ].join('');
+
+        // Bagian I.c
+        dom.res1c.innerHTML = [
+          formulaRowHTML(
+            'Volume BP per Lubang & Total',
+            'V_BP_hole = (π × De² / 4) × PC  |  V_BP_total = N × V_BP_hole',
+            `${c.N} lubang × ${fmt(c.V_BP_hole, 3)} ${c.uVol}/lubang`,
+            `${fmt(c.V_BP_total, 2)} ${c.uVol}`
+          ),
+          formulaRowHTML(
+            'Densitas BP & Berat BP Total (W_BP_total)',
+            c.isM ? 'rho_BP = SG_BP × 1000  |  W_BP_total = V_BP_total × rho_BP' : 'rho_BP = SG_BP × 62.428  |  W_BP_total = V_BP_total × rho_BP',
+            `${fmt(c.V_BP_total, 2)} ${c.uVol} × ${fmt(c.rho_BP, 2)} ${c.uDens} (${fmt(c.W_BP_hole, 1)} ${c.uMass}/lubang)`,
+            `${fmt(c.W_BP_total, 2)} ${c.uMass}`,
+            true
+          ),
+          formulaRowHTML(
+            'Berat Batuan Terbongkar (W_batuan)',
+            c.isM ? 'W_batuan = (V_koreksi × rho_rock) / 1000' : 'W_batuan = (V_koreksi × rho_rock) / 2000',
+            `(${fmt(c.V_koreksi, 0)} ${c.uVol} × ${fmt(c.rho_rock, 1)} ${c.uDens}) / ${c.isM ? '1000' : '2000'}`,
+            `${fmt(c.W_batuan, 2)} ton`
+          ),
+          formulaRowHTML(
+            'Powder Factor (PF) & Blasting Ratio (BR)',
+            'PF = W_batuan / W_BP_total  |  BR = W_BP_total / V_koreksi',
+            `${fmt(c.W_batuan, 1)} ton / ${fmt(c.W_BP_total, 1)} ${c.uMass}`,
+            `PF = ${fmt(c.PF, 2)} ${c.uPF} | BR = ${fmt(c.BR, 4)} ${c.uBR}`,
+            true
+          )
+        ].join('');
+
+        // Bagian I.d — 4-tier Stiffness Ratio Evaluation
+        let srStatus = 'Baik & Terkontrol (2 ≤ SR ≤ 4)';
+        let srClass = 'sr-pill';
+        let srDesc = 'Nilai 2 ≤ SR ≤ 4 menghasilkan fragmentasi seragam, kontrol getaran tanah baik, serta lemparan batuan (throw) terkendali.';
+        if (c.SR < 1) {
+          srStatus = 'Kaku / Buruk (SR < 1)';
+          srClass = 'sr-pill danger';
+          srDesc = 'Jenjang sangat kaku (SR < 1): potensi boulder ekstrem, backbreak parah, flyrock tinggi, dan getaran tanah besar.';
+        } else if (c.SR < 2) {
+          srStatus = 'Sedang (1 ≤ SR < 2)';
+          srClass = 'sr-pill warn';
+          srDesc = 'Jenjang agak kaku (1 ≤ SR < 2): fragmentasi kurang seragam dan potensi toe/boulder di bagian atas jenjang.';
+        } else if (c.SR > 4) {
+          srStatus = 'Sangat Fleksibel (SR > 4)';
+          srClass = 'sr-pill warn';
+          srDesc = 'Jenjang sangat fleksibel (SR > 4): peledakan terkontrol dan fragmentasi halus, perhatikan kelurusan deviasi lubang bor.';
+        }
+
+        dom.srBadge.className = srClass;
+        dom.srBadge.textContent = `SR = ${fmt(c.SR, 2)} • ${srStatus}`;
+
+        dom.res1d.innerHTML = [
+          formulaRowHTML(
+            'Stiffness Ratio (SR)',
+            'SR = H / B',
+            `${fmt(c.H, 2)} ${c.uLen} / ${fmt(c.B, 2)} ${c.uLen}`,
+            `SR = ${fmt(c.SR, 2)}`,
+            true
+          ),
+          `<div class="formula-item" style="flex-direction: column; align-items: flex-start;">
+            <div class="f-name">Evaluasi Kinerja: ${srStatus}</div>
+            <div class="f-sub" style="color: #cbd5e1; font-family: var(--font-sans); font-size: 11px; line-height: 1.5;">
+              ${srDesc}
+            </div>
+          </div>`
+        ].join('');
+      }
+
+      // =======================================================================
+      // 7. BOREHOLE GRID & DELAY SCHEDULE GENERATOR
+      // =======================================================================
+      function buildBoreholeLayout() {
+        const {
+          W_lereng_ft, Pj_koreksi_ft,
+          B_ft, S_ft, Row, N
+        } = calc;
+
+        const widZ = Math.max(15, W_lereng_ft);
+        const baseCols = Math.floor(N / Row);
+        const remCols = N % Row;
+
+        const holes = [];
+        let idCounter = 1;
+        let maxDelayMs = 0;
+
+        for (let r = 0; r < Row; r++) {
+          // r = 0 is front row closest to +Z Free Face
+          const z = widZ / 2 - (r + 0.5) * B_ft;
+          const colsInRow = baseCols + (r < remCols ? 1 : 0);
+          const staggerShift = (state.pattern === 'staggered' && r % 2 === 1) ? S_ft * 0.5 : 0;
+          const startX = -((colsInRow - 1) * S_ft) / 2 + staggerShift * 0.5;
+
+          for (let c = 0; c < colsInRow; c++) {
+            const x = startX + c * S_ft;
+            const midCol = (colsInRow - 1) / 2;
+            let delayMs = 0;
+            if (state.blast_seq === 'corner_cut') {
+              delayMs = Math.round(r * state.delay_row_ms + c * state.delay_hole_ms);
+            } else if (state.blast_seq === 'box_cut') {
+              const distFromCenter = Math.abs(c - midCol);
+              delayMs = Math.round(r * state.delay_row_ms + distFromCenter * state.delay_hole_ms);
+            } else if (state.blast_seq === 'v_cut') {
+              const distFromV = Math.abs(c - midCol);
+              delayMs = Math.round(r * state.delay_row_ms + distFromV * state.delay_hole_ms);
+            } else if (state.blast_seq === 'hole_by_hole') {
+              delayMs = Math.round((idCounter - 1) * state.delay_hole_ms);
+            } else if (state.blast_seq === 'row_by_row') {
+              delayMs = Math.round(r * state.delay_row_ms);
+            }
+            if (delayMs > maxDelayMs) maxDelayMs = delayMs;
+
+            holes.push({
+              id: idCounter++,
+              row: r + 1,
+              col: c + 1,
+              rowIdx: r,
+              colIdx: c,
+              x,
+              z,
+              delayMs,
+              fired: false,
+              screenX: 0,
+              screenY: 0,
+              screenBotX: 0,
+              screenBotY: 0,
+              radiusPx: 6
+            });
+          }
+        }
+
+        cachedHoles = holes;
+        dom.lblMaxDelay.textContent = `Total Durasi Detonasi: ${maxDelayMs} ms`;
+        renderDelayScheduleTable(holes);
+        updateInspectCard();
+      }
+
+      function renderDelayScheduleTable(holes) {
+        const c = calc;
+        dom.delayTableBody.innerHTML = holes.map(h => `
+          <tr data-hole-id="${h.id}">
+            <td style="color: var(--cyan); font-weight: 800;">#${h.id}</td>
+            <td>Baris ${h.row}</td>
+            <td>Kolom ${h.col}</td>
+            <td style="color: var(--amber-light); font-weight: 700;">${h.delayMs} ms</td>
+            <td>${fmt(c.H, 2)} ${c.uLen}</td>
+            <td>${fmt(c.T, 2)} ${c.uLen}</td>
+            <td>${fmt(c.PC, 2)} ${c.uLen}</td>
+            <td>${fmt(c.W_BP_hole, 1)} ${c.uMass}</td>
+          </tr>
+        `).join('');
+
+        dom.delayTableBody.querySelectorAll('tr').forEach(tr => {
+          tr.addEventListener('click', () => {
+            state.selectedHoleId = Number(tr.dataset.holeId);
+            updateInspectCard();
+            render3DScene();
+            dom.canvasWrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          });
+        });
+      }
+
+      function updateInspectCard() {
+        if (!state.selectedHoleId) {
+          dom.inspectCard.classList.remove('open');
+          return;
+        }
+        const h = cachedHoles.find(item => item.id === state.selectedHoleId);
+        if (!h) {
+          dom.inspectCard.classList.remove('open');
+          return;
+        }
+        const c = calc;
+        dom.inspHoleTitle.textContent = `Lubang #${h.id} (Baris ${h.row}, Kolom ${h.col})`;
+        dom.inspHoleDelay.textContent = `${h.delayMs} ms`;
+        dom.inspHoleH.textContent = `${fmt(c.H, 2)} ${c.uLen}`;
+        dom.inspHoleT.textContent = `${fmt(c.T, 2)} ${c.uLen}`;
+        dom.inspHolePc.textContent = `${fmt(c.PC, 2)} ${c.uLen}`;
+        dom.inspHoleJ.textContent = `${fmt(c.J, 2)} ${c.uLen}`;
+        dom.inspHoleWbp.textContent = `${fmt(c.W_BP_hole, 1)} ${c.uMass}`;
+        dom.inspectCard.classList.add('open');
+      }
+
+      // =======================================================================
+      // 8. PURE JAVASCRIPT 3D ENGINE ON HTML5 <CANVAS> (100% OFFLINE)
+      //    - Slanted Bench Face & Tilted Boreholes
+      //    - Interactive Cross-Section Slicer (0% - 100%)
+      //    - Tie-Up Network & Delay Badges
+      //    - Flyrock Safety Arc + Free Face Directional Arrow
+      //    - Sequential Blast Detonation + 3D Muckpile Heave Collapse
+      // =======================================================================
+      const cam = {
+        yaw: -0.64,
+        pitch: 0.43,
+        zoom: 1.0,
+        panX: 0,
+        panY: 18
+      };
+
+      const blastSim = {
+        active: false,
+        simMs: 0,
+        collapseProgress: 0, // 0 = intact bench, 1 = full muckpile heap
+        fragments: [],
+        rings: [],
+        flashes: []
+      };
+
+      function project3D(x, y, z, width, height, baseScale) {
+        const cy = Math.cos(cam.yaw);
+        const sy = Math.sin(cam.yaw);
+        const x1 = x * cy - z * sy;
+        const z1 = x * sy + z * cy;
+
+        const cp = Math.cos(cam.pitch);
+        const sp = Math.sin(cam.pitch);
+        const y2 = y * cp - z1 * sp;
+        const z2 = y * sp + z1 * cp;
+
+        const fov = 980;
+        const dist = fov + z2 * baseScale * 0.45;
+        const persp = fov / Math.max(250, dist);
+
+        const sx = width * 0.5 + cam.panX + x1 * baseScale * cam.zoom * persp;
+        const syScreen = height * 0.55 + cam.panY - y2 * baseScale * cam.zoom * persp;
+
+        return { x: sx, y: syScreen, depth: z2, scale: baseScale * cam.zoom * persp };
+      }
+
+      // Clip a convex/monotone YZ polygon against half-plane z <= zMaxClip
+      function clipYZPolygon(poly, zMaxClip) {
+        const out = [];
+        for (let i = 0; i < poly.length; i++) {
+          const cur = poly[i];
+          const nxt = poly[(i + 1) % poly.length];
+          const curIn = cur[1] <= zMaxClip + 1e-5;
+          const nxtIn = nxt[1] <= zMaxClip + 1e-5;
+
+          if (curIn && nxtIn) {
+            out.push(nxt);
+          } else if (curIn && !nxtIn) {
+            const t = (zMaxClip - cur[1]) / (nxt[1] - cur[1]);
+            out.push([cur[0] + t * (nxt[0] - cur[0]), zMaxClip]);
+          } else if (!curIn && nxtIn) {
+            const t = (zMaxClip - cur[1]) / (nxt[1] - cur[1]);
+            out.push([cur[0] + t * (nxt[0] - cur[0]), zMaxClip]);
+            out.push(nxt);
+          }
+        }
+        return out;
+      }
+
+      // Extrude a counter-clockwise YZ polygon along X from xMin to xMax
+      function extrudeYZPolygon(yzPoly, xMin, xMax, palette, strokeColor, alpha, isSliced) {
+        if (yzPoly.length < 3) return [];
+        const faces = [];
+
+        // Left Cap (x = xMin, normal [-1, 0, 0])
+        faces.push({
+          pts: [...yzPoly].reverse().map(p => [xMin, p[0], p[1]]),
+          normal: [-1, 0, 0],
+          color: palette.side,
+          shade: 0.72,
+          stroke: strokeColor,
+          alpha
+        });
+
+        // Right Cap (x = xMax, normal [+1, 0, 0])
+        faces.push({
+          pts: yzPoly.map(p => [xMax, p[0], p[1]]),
+          normal: [1, 0, 0],
+          color: palette.right,
+          shade: 0.82,
+          stroke: strokeColor,
+          alpha
+        });
+
+        // Perimeter Quads
+        for (let i = 0; i < yzPoly.length; i++) {
+          const p0 = yzPoly[i];
+          const p1 = yzPoly[(i + 1) % yzPoly.length];
+          const dy = p1[0] - p0[0];
+          const dz = p1[1] - p0[1];
+          const len = Math.hypot(dy, dz) || 1;
+          // Outward normal for CCW polygon in (y, z)
+          const ny = dz / len;
+          const nz = -dy / len;
+
+          let col = palette.side;
+          let shade = 0.75;
+          let edgeStroke = strokeColor;
+
+          if (ny > 0.7) {
+            col = palette.top;
+            shade = 1.0;
+          } else if (ny < -0.7) {
+            col = palette.side;
+            shade = 0.55;
+          } else if (nz > 0.2) {
+            col = isSliced && Math.abs(ny) < 0.05 ? palette.slice : palette.front;
+            shade = 0.92;
+            if (isSliced && Math.abs(ny) < 0.05) edgeStroke = 'rgba(34, 211, 238, 0.85)';
+          } else {
+            col = palette.side;
+            shade = 0.65;
+          }
+
+          faces.push({
+            pts: [
+              [xMin, p0[0], p0[1]],
+              [xMax, p0[0], p0[1]],
+              [xMax, p1[0], p1[1]],
+              [xMin, p1[0], p1[1]]
+            ],
+            normal: [0, ny, nz],
+            color: col,
+            shade,
+            stroke: edgeStroke,
+            alpha
+          });
+        }
+
+        return faces;
+      }
+
+      function isFaceFrontFacing(n) {
+        const cy = Math.cos(cam.yaw);
+        const sy = Math.sin(cam.yaw);
+        const nx1 = n[0] * cy - n[2] * sy;
+        const nz1 = n[0] * sy + n[2] * cy;
+
+        const cp = Math.cos(cam.pitch);
+        const sp = Math.sin(cam.pitch);
+        const nz2 = n[1] * sp + nz1 * cp;
+        return nz2 < 0.1;
+      }
+
+      function applyShade(rgb, factor) {
+        const r = Math.min(255, Math.round(rgb[0] * factor));
+        const g = Math.min(255, Math.round(rgb[1] * factor));
+        const b = Math.min(255, Math.round(rgb[2] * factor));
+        return `rgb(${r},${g},${b})`;
+      }
+
+      function drawPolygonFace(c2d, face, width, height, baseScale) {
+        const proj = face.pts.map(p => project3D(p[0], p[1], p[2], width, height, baseScale));
+        c2d.save();
+        c2d.beginPath();
+        c2d.moveTo(proj[0].x, proj[0].y);
+        for (let i = 1; i < proj.length; i++) {
+          c2d.lineTo(proj[i].x, proj[i].y);
+        }
+        c2d.closePath();
+
+        c2d.globalAlpha = face.alpha;
+        c2d.fillStyle = applyShade(face.color, face.shade);
+        c2d.fill();
+
+        if (face.stroke) {
+          c2d.globalAlpha = Math.min(1, face.alpha + 0.3);
+          c2d.strokeStyle = face.stroke;
+          c2d.lineWidth = 1.1;
+          c2d.stroke();
+        }
+        c2d.restore();
+      }
+
+      function draw3DCylinderSegment(c2d, pTop3d, pBot3d, radiusFt, fillColor, strokeColor, width, height, baseScale) {
+        const pTop = project3D(pTop3d[0], pTop3d[1], pTop3d[2], width, height, baseScale);
+        const pBot = project3D(pBot3d[0], pBot3d[1], pBot3d[2], width, height, baseScale);
+        const rPx = Math.max(2.6, radiusFt * pTop.scale);
+
+        c2d.save();
+        c2d.strokeStyle = fillColor;
+        c2d.lineWidth = rPx * 2;
+        c2d.lineCap = 'butt';
+        c2d.beginPath();
+        c2d.moveTo(pTop.x, pTop.y);
+        c2d.lineTo(pBot.x, pBot.y);
+        c2d.stroke();
+
+        if (strokeColor) {
+          c2d.strokeStyle = strokeColor;
+          c2d.lineWidth = 1.1;
+          const dx = pBot.x - pTop.x;
+          const dy = pBot.y - pTop.y;
+          const len = Math.hypot(dx, dy) || 1;
+          const nx = (-dy / len) * rPx;
+          const ny = (dx / len) * rPx;
+          c2d.beginPath();
+          c2d.moveTo(pTop.x + nx, pTop.y + ny);
+          c2d.lineTo(pBot.x + nx, pBot.y + ny);
+          c2d.moveTo(pTop.x - nx, pTop.y - ny);
+          c2d.lineTo(pBot.x - nx, pBot.y - ny);
+          c2d.stroke();
+        }
+
+        c2d.fillStyle = fillColor;
+        c2d.beginPath();
+        c2d.ellipse(pTop.x, pTop.y, rPx, Math.max(1.4, rPx * 0.48), 0, 0, Math.PI * 2);
+        c2d.fill();
+        c2d.restore();
+      }
+
+      function draw3DLine(c2d, p1, p2, color, width, height, baseScale, lineWidth = 1.6, dash = []) {
+        const a = project3D(p1[0], p1[1], p1[2], width, height, baseScale);
+        const b = project3D(p2[0], p2[1], p2[2], width, height, baseScale);
+        c2d.save();
+        c2d.strokeStyle = color;
+        c2d.lineWidth = lineWidth;
+        c2d.setLineDash(dash);
+        c2d.beginPath();
+        c2d.moveTo(a.x, a.y);
+        c2d.lineTo(b.x, b.y);
+        c2d.stroke();
+        c2d.restore();
+      }
+
+      function drawCallout(c2d, p3d, offsetX, offsetY, text, borderColor, textColor, width, height, baseScale) {
+        const p = project3D(p3d[0], p3d[1], p3d[2], width, height, baseScale);
+        const lx = p.x + offsetX;
+        const ly = p.y + offsetY;
+
+        c2d.save();
+        c2d.strokeStyle = borderColor;
+        c2d.lineWidth = 1.3;
+        c2d.beginPath();
+        c2d.moveTo(p.x, p.y);
+        c2d.lineTo(lx, ly);
+        c2d.stroke();
+
+        c2d.fillStyle = borderColor;
+        c2d.beginPath();
+        c2d.arc(p.x, p.y, 3, 0, Math.PI * 2);
+        c2d.fill();
+
+        c2d.font = '700 10.5px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+        const metrics = c2d.measureText(text);
+        const padX = 6;
+        const boxW = metrics.width + padX * 2;
+        const boxH = 19;
+        const bx = offsetX >= 0 ? lx : lx - boxW;
+        const by = ly - boxH / 2;
+
+        c2d.fillStyle = 'rgba(6, 10, 19, 0.92)';
+        c2d.strokeStyle = borderColor;
+        c2d.lineWidth = 1.2;
+        c2d.beginPath();
+        if (c2d.roundRect) {
+          c2d.roundRect(bx, by, boxW, boxH, 6);
+        } else {
+          c2d.rect(bx, by, boxW, boxH);
+        }
+        c2d.fill();
+        c2d.stroke();
+
+        c2d.fillStyle = textColor;
+        c2d.textBaseline = 'middle';
+        c2d.fillText(text, bx + padX, by + boxH / 2 + 0.5);
+        c2d.restore();
+      }
+
+      // Draw 3D Fragmented Muckpile Heap after Blast Simulation
+      function drawMuckpileHeap(c2d, lenX, hgtY, zCrest, zToe, width, height, baseScale) {
+        const prog = blastSim.collapseProgress;
+        if (prog <= 0.02) return;
+
+        const zStart = zCrest - 12 * prog;
+        const zEnd = zToe + 38 * prog;
+        const peakH = hgtY * 0.52 * prog;
+        const segsX = 10;
+        const segsZ = 5;
+
+        const muckFaces = [];
+        for (let ix = 0; ix < segsX; ix++) {
+          const x0 = -lenX * 0.52 + (ix / segsX) * (lenX * 1.04);
+          const x1 = -lenX * 0.52 + ((ix + 1) / segsX) * (lenX * 1.04);
+          for (let iz = 0; iz < segsZ; iz++) {
+            const t0 = iz / segsZ;
+            const t1 = (iz + 1) / segsZ;
+            const z0 = zStart + t0 * (zEnd - zStart);
+            const z1 = zStart + t1 * (zEnd - zStart);
+
+            // Mound profile curve (highest near toe, tapering forward)
+            const h0 = peakH * Math.sin(Math.min(1, t0 * 1.15) * Math.PI * 0.82) * (0.85 + 0.15 * Math.sin(ix * 2.1));
+            const h1 = peakH * Math.sin(Math.min(1, t1 * 1.15) * Math.PI * 0.82) * (0.85 + 0.15 * Math.cos(ix * 1.7));
+
+            const pts = [
+              [x0, Math.max(0, h0), z0],
+              [x1, Math.max(0, h0 * 0.95), z0],
+              [x1, Math.max(0, h1), z1],
+              [x0, Math.max(0, h1 * 0.95), z1]
+            ];
+            const depth = pts.reduce((acc, p) => acc + project3D(p[0], p[1], p[2], width, height, baseScale).depth, 0) / 4;
+            const shade = 0.68 + 0.32 * (1 - t0);
+            muckFaces.push({
+              pts,
+              depth,
+              color: (ix + iz) % 2 === 0 ? [120, 113, 108] : [100, 95, 90],
+              shade,
+              stroke: 'rgba(214, 211, 209, 0.35)',
+              alpha: Math.min(0.94, prog * 1.1)
+            });
+          }
+        }
+
+        muckFaces.sort((a, b) => b.depth - a.depth);
+        muckFaces.forEach(f => drawPolygonFace(c2d, f, width, height, baseScale));
+
+        if (prog > 0.65) {
+          drawCallout(
+            c2d,
+            [0, peakH * 0.85, (zStart + zEnd) * 0.52],
+            0, -18,
+            'MUCKPILE (Tumpukan Hasil Peledakan)',
+            '#a8a29e', '#f5f5f4', width, height, baseScale
+          );
+        }
+      }
+
+      // Core Scene Renderer (used by both live canvas and PNG snapshot exporter)
+      function renderSceneToContext(c2d, width, height) {
+        c2d.clearRect(0, 0, width, height);
+
+        const {
+          H_lereng_ft, W_lereng_ft, Pj_koreksi_ft,
+          B_ft, S_ft, T_ft, J_ft, H_ft, PC_ft, De_ft,
+          alpha_rad, beta_rad, flyrock_ft,
+          B, S, T, J, H, PC, Pj_koreksi, W_lereng, uLen
+        } = calc;
+
+        const lenX = Math.max(20, Pj_koreksi_ft);
+        const effectiveHgtY = Math.max(2, H_lereng_ft * (1 - blastSim.collapseProgress * 0.68));
+        const widZ = Math.max(15, W_lereng_ft);
+        const subDepth = Math.max(J_ft * Math.cos(alpha_rad) + 4, 7);
+
+        // Slanted Bench Face Geometry
+        const faceRunZ = H_lereng_ft / Math.tan(beta_rad);
+        const zBack = -widZ / 2;
+        const zCrest = widZ / 2;
+        const zToe = zCrest + faceRunZ;
+        const zSlice = zToe;
+        const isSliced = false;
+
+        // Auto-fit scale
+        const maxSpan = Math.max(lenX * 0.78, (widZ + faceRunZ) * 1.38, H_lereng_ft * 2.4, 82);
+        const baseScale = Math.min(width, height) / (maxSpan * 1.5);
+
+        // 1. Pit Floor Grid at y = 0
+        const gridHalfX = lenX * 0.75;
+        const gridMinZ = zBack - 16;
+        const gridMaxZ = zToe + 58;
+        const step = Math.max(10, Math.round(Math.max(gridHalfX, widZ) / 6));
+        for (let gx = -gridHalfX; gx <= gridHalfX; gx += step) {
+          draw3DLine(c2d, [gx, 0, gridMinZ], [gx, 0, gridMaxZ], 'rgba(51, 65, 85, 0.34)', width, height, baseScale, 1);
+        }
+        for (let gz = gridMinZ; gz <= gridMaxZ; gz += step) {
+          draw3DLine(c2d, [-gridHalfX, 0, gz], [gridHalfX, 0, gz], 'rgba(51, 65, 85, 0.34)', width, height, baseScale, 1);
+        }
+
+        // 2. Flyrock Safety Zone Arc in Front of Free Face (+Z)
+        if (state.showFlyrock) {
+          const visArcRadius = Math.min(widZ * 0.85, Math.max(24, flyrock_ft * 0.24));
+          const arcSegs = 28;
+          c2d.save();
+          c2d.beginPath();
+          for (let i = 0; i <= arcSegs; i++) {
+            const ang = -Math.PI * 0.42 + (i / arcSegs) * (Math.PI * 0.84);
+            const ax = Math.sin(ang) * (lenX * 0.55);
+            const az = zToe + Math.cos(ang) * visArcRadius;
+            const p = project3D(ax, 0.1, az, width, height, baseScale);
+            if (i === 0) c2d.moveTo(p.x, p.y);
+            else c2d.lineTo(p.x, p.y);
+          }
+          c2d.strokeStyle = 'rgba(244, 63, 94, 0.75)';
+          c2d.lineWidth = 2;
+          c2d.setLineDash([6, 5]);
+          c2d.stroke();
+          c2d.restore();
+
+          drawCallout(
+            c2d,
+            [0, 0.2, zToe + visArcRadius],
+            0, 18,
+            `Zona Flyrock ~ ${fmt(calc.flyrock, 0)} ${uLen}`,
+            '#f43f5e', '#fecdd3', width, height, baseScale
+          );
+        }
+
+        // 3. Prominent Glowing "FREE FACE (BIDANG BEBAS)" Directional Arrow
+        const arrowZ0 = zToe + 5;
+        const arrowZ1 = zToe + 22;
+        draw3DLine(c2d, [0, 0.3, arrowZ0], [0, 0.3, arrowZ1], '#10b981', width, height, baseScale, 3.2);
+        draw3DLine(c2d, [-4.5, 0.3, arrowZ1 - 5.5], [0, 0.3, arrowZ1], '#10b981', width, height, baseScale, 3.2);
+        draw3DLine(c2d, [4.5, 0.3, arrowZ1 - 5.5], [0, 0.3, arrowZ1], '#10b981', width, height, baseScale, 3.2);
+        drawCallout(
+          c2d,
+          [0, 0.3, arrowZ1],
+          22, 10,
+          'FREE FACE (BIDANG BEBAS)',
+          '#10b981', '#a7f3d0', width, height, baseScale
+        );
+
+        // 4. Construct Rock Bench & Bedrock Faces with Cross-Section Slicer
+        const xMin = -lenX / 2;
+        const xMax = lenX / 2;
+
+        // Bench YZ Polygon (CCW): (0, zBack) -> (0, zToe) -> (H_lereng, zCrest) -> (H_lereng, zBack)
+        const benchYZRaw = [
+          [0, zBack],
+          [0, zToe],
+          [effectiveHgtY, zCrest],
+          [effectiveHgtY, zBack]
+        ];
+        const benchYZClipped = isSliced ? clipYZPolygon(benchYZRaw, zSlice) : benchYZRaw;
+
+        // Sub-grade Bedrock YZ Polygon (CCW): (-subDepth, zBack) -> (-subDepth, zToe) -> (0, zToe) -> (0, zBack)
+        const subYZRaw = [
+          [-subDepth, zBack],
+          [-subDepth, zToe],
+          [0, zToe],
+          [0, zBack]
+        ];
+        const subYZClipped = isSliced ? clipYZPolygon(subYZRaw, zSlice) : subYZRaw;
+
+        const rockPalette = {
+          top: [71, 85, 105],
+          front: [51, 65, 85],
+          right: [60, 75, 96],
+          side: [40, 52, 70],
+          slice: [30, 58, 82]
+        };
+        const subPalette = {
+          top: [15, 23, 42],
+          front: [13, 34, 48],
+          right: [15, 40, 54],
+          side: [10, 20, 34],
+          slice: [14, 46, 62]
+        };
+
+        const rockAlpha = state.xray ? 0.24 : 0.88;
+        const subAlpha = state.xray ? 0.22 : 0.80;
+
+        const allFaces = [
+          ...extrudeYZPolygon(benchYZClipped, xMin, xMax, rockPalette, 'rgba(148,163,184,0.45)', rockAlpha, isSliced),
+          ...extrudeYZPolygon(subYZClipped, xMin, xMax, subPalette, 'rgba(20,184,166,0.38)', subAlpha, isSliced)
+        ];
+
+        allFaces.forEach(f => {
+          f.avgDepth = f.pts.reduce((sum, p) => sum + project3D(p[0], p[1], p[2], width, height, baseScale).depth, 0) / f.pts.length;
+          f.frontFacing = isFaceFrontFacing(f.normal);
+        });
+        allFaces.sort((a, b) => b.avgDepth - a.avgDepth);
+
+        // Pass 1: Back-facing rock faces (when X-Ray is ON)
+        if (state.xray) {
+          allFaces.forEach(f => {
+            if (!f.frontFacing) drawPolygonFace(c2d, f, width, height, baseScale);
+          });
+        }
+
+        // Pass 2: Borehole Columns (Tilted by alpha_rad toward +Z Free Face)
+        if (cachedHoles.length === 0) buildBoreholeLayout();
+        const sinA = Math.sin(alpha_rad);
+        const cosA = Math.cos(alpha_rad);
+        const holeVisRadius = Math.max(De_ft * 0.88, 0.92);
+
+        // Helper to get 3D coordinate at distance `s` along tilted borehole axis
+        const holePt = (h, s) => [
+          h.x,
+          effectiveHgtY - s * cosA,
+          h.z + s * sinA
+        ];
+
+        const sortedHoles = [...cachedHoles].map(h => {
+          const midPt = holePt(h, H_ft * 0.5);
+          return {
+            hole: h,
+            depth: project3D(midPt[0], midPt[1], midPt[2], width, height, baseScale).depth
+          };
+        }).sort((a, b) => b.depth - a.depth);
+
+        let sampleCutHole = null;
+
+        sortedHoles.forEach(({ hole: h }) => {
+          const isSelected = h.id === state.selectedHoleId;
+          const isExposedBySlice = isSliced && h.z >= zSlice - B_ft * 0.55;
+          if (isExposedBySlice && (!sampleCutHole || h.x > sampleCutHole.x)) {
+            sampleCutHole = h;
+          }
+
+          const rad = isSelected ? holeVisRadius * 1.48 : holeVisRadius;
+          const showFullColumn = state.xray || isExposedBySlice || isSelected;
+
+          const pCollar = holePt(h, 0);
+          const pStemBot = holePt(h, Math.min(H_ft, T_ft));
+          const sFloor = effectiveHgtY / Math.max(0.1, cosA);
+          const pFloor = holePt(h, Math.min(H_ft, sFloor));
+          const pHoleBot = holePt(h, H_ft);
+
+          // Store screen hit-box for Tap-to-Inspect
+          const projTop = project3D(pCollar[0], pCollar[1], pCollar[2], width, height, baseScale);
+          const projBot = project3D(pHoleBot[0], pHoleBot[1], pHoleBot[2], width, height, baseScale);
+          h.screenX = projTop.x;
+          h.screenY = projTop.y;
+          h.screenBotX = projBot.x;
+          h.screenBotY = projBot.y;
+          h.radiusPx = Math.max(5, rad * projTop.scale);
+
+          if (showFullColumn) {
+            // 1) Subdrilling (J) below y = 0 (Purple)
+            if (H_ft > sFloor) {
+              draw3DCylinderSegment(
+                c2d, pFloor, pHoleBot, rad,
+                h.fired ? '#e9d5ff' : '#a855f7',
+                isSelected ? '#22d3ee' : null,
+                width, height, baseScale
+              );
+            }
+
+            // 2) Explosive Column (PC) from pStemBot down to pFloor (Orange-Red)
+            if (Math.min(H_ft, sFloor) > T_ft) {
+              draw3DCylinderSegment(
+                c2d, pStemBot, pFloor, rad,
+                h.fired ? '#fef08a' : '#f97316',
+                isSelected ? '#22d3ee' : null,
+                width, height, baseScale
+              );
+
+              // Primer Booster near bottom of PC (Bright Yellow)
+              const sPrimerTop = Math.max(T_ft, Math.min(H_ft, sFloor) - Math.max(1.2, PC_ft * 0.09));
+              const pPrimerTop = holePt(h, sPrimerTop);
+              draw3DCylinderSegment(
+                c2d, pPrimerTop, pFloor, rad * 1.2,
+                '#fde047',
+                '#0f172a',
+                width, height, baseScale
+              );
+            }
+
+            // 3) Stemming (T) from collar down to pStemBot (Tan/Sandstone)
+            if (T_ft > 0) {
+              draw3DCylinderSegment(
+                c2d, pCollar, pStemBot, rad,
+                '#d97706',
+                isSelected ? '#22d3ee' : null,
+                width, height, baseScale
+              );
+            }
+          } else {
+            // Solid rock mode: draw collar cap on crest
+            c2d.save();
+            c2d.fillStyle = h.fired ? '#fef08a' : '#fbbf24';
+            c2d.strokeStyle = '#0f172a';
+            c2d.lineWidth = 1;
+            c2d.beginPath();
+            c2d.ellipse(projTop.x, projTop.y, h.radiusPx, Math.max(1.5, h.radiusPx * 0.48), 0, 0, Math.PI * 2);
+            c2d.fill();
+            c2d.stroke();
+            c2d.restore();
+          }
+
+          // Cyan Selection Halo if tapped/selected
+          if (isSelected) {
+            c2d.save();
+            c2d.strokeStyle = '#22d3ee';
+            c2d.lineWidth = 2.4;
+            c2d.beginPath();
+            c2d.arc(projTop.x, projTop.y, h.radiusPx + 6, 0, Math.PI * 2);
+            c2d.stroke();
+            c2d.restore();
+          }
+        });
+
+        if (!sampleCutHole && cachedHoles.length > 0) {
+          sampleCutHole = cachedHoles[Math.min(cachedHoles.length - 1, Math.floor(cachedHoles.length / calc.Row) - 1)];
+        }
+
+        // Pass 3: Front-facing rock faces
+        allFaces.forEach(f => {
+          if (f.frontFacing) drawPolygonFace(c2d, f, width, height, baseScale);
+        });
+
+        // Pass 4: Surface Tie-Up Network & Millisecond Delay Overlay
+        if (state.showTieUp && cachedHoles.length > 0 && blastSim.collapseProgress < 0.35) {
+          // Group holes by row
+          const rowsMap = new Map();
+          cachedHoles.forEach(h => {
+            if (!rowsMap.has(h.rowIdx)) rowsMap.set(h.rowIdx, []);
+            rowsMap.get(h.rowIdx).push(h);
+          });
+
+          // Row-to-Row Trunkline along Column 0 (Red-Orange)
+          for (let r = 0; r < calc.Row - 1; r++) {
+            const curRow = rowsMap.get(r);
+            const nxtRow = rowsMap.get(r + 1);
+            if (curRow && nxtRow && curRow[0] && nxtRow[0]) {
+              draw3DLine(
+                c2d,
+                [curRow[0].x, effectiveHgtY + 0.35, curRow[0].z],
+                [nxtRow[0].x, effectiveHgtY + 0.35, nxtRow[0].z],
+                '#f43f5e', width, height, baseScale, 2.2
+              );
+            }
+          }
+
+          // Hole-to-Hole Initiation Lines within each row (Cyan) + Delay Labels
+          rowsMap.forEach((rowHoles, rIdx) => {
+            for (let i = 0; i < rowHoles.length - 1; i++) {
+              draw3DLine(
+                c2d,
+                [rowHoles[i].x, effectiveHgtY + 0.35, rowHoles[i].z],
+                [rowHoles[i + 1].x, effectiveHgtY + 0.35, rowHoles[i + 1].z],
+                '#22d3ee', width, height, baseScale, 1.5, [4, 3]
+              );
+            }
+
+            // Show ms tags on key holes (first, middle, last of front & back rows)
+            rowHoles.forEach((h, cIdx) => {
+              const showBadge = (rIdx === 0 || rIdx === calc.Row - 1) &&
+                                (cIdx === 0 || cIdx === rowHoles.length - 1 || cIdx === Math.floor(rowHoles.length / 2));
+              if (showBadge) {
+                const p = project3D(h.x, effectiveHgtY + 0.5, h.z, width, height, baseScale);
+                c2d.save();
+                c2d.font = '700 9.5px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+                const txt = `${h.delayMs}ms`;
+                const tw = c2d.measureText(txt).width;
+                c2d.fillStyle = 'rgba(6, 10, 19, 0.85)';
+                c2d.fillRect(p.x - tw / 2 - 3, p.y - 17, tw + 6, 13);
+                c2d.fillStyle = '#fde047';
+                c2d.textAlign = 'center';
+                c2d.fillText(txt, p.x, p.y - 7);
+                c2d.restore();
+              }
+            });
+          });
+        }
+
+        // Pass 5: 3D Muckpile Heap (when blast simulation has progressed)
+        drawMuckpileHeap(c2d, lenX, H_lereng_ft, zCrest, zToe, width, height, baseScale);
+
+        // Pass 6: Blast Simulation FX (Shockwave Rings, Flashes, Flying Rock Particles)
+        blastSim.rings.forEach(r => {
+          const p = project3D(r.x, effectiveHgtY + 0.3, r.z, width, height, baseScale);
+          const radPx = r.radius * p.scale;
+          c2d.save();
+          c2d.strokeStyle = `rgba(251, 191, 36, ${r.alpha})`;
+          c2d.lineWidth = 2.4;
+          c2d.beginPath();
+          c2d.ellipse(p.x, p.y, radPx, radPx * 0.48, 0, 0, Math.PI * 2);
+          c2d.stroke();
+          c2d.restore();
+        });
+
+        blastSim.flashes.forEach(fl => {
+          const p = project3D(fl.x, effectiveHgtY + 0.6, fl.z, width, height, baseScale);
+          const radPx = fl.radius * p.scale;
+          c2d.save();
+          const grad = c2d.createRadialGradient(p.x, p.y, 1, p.x, p.y, radPx);
+          grad.addColorStop(0, `rgba(255, 255, 255, ${fl.alpha})`);
+          grad.addColorStop(0.45, `rgba(249, 115, 22, ${fl.alpha * 0.85})`);
+          grad.addColorStop(1, 'rgba(220, 38, 38, 0)');
+          c2d.fillStyle = grad;
+          c2d.beginPath();
+          c2d.arc(p.x, p.y, radPx, 0, Math.PI * 2);
+          c2d.fill();
+          c2d.restore();
+        });
+
+        blastSim.fragments.forEach(fr => {
+          const p = project3D(fr.x, fr.y, fr.z, width, height, baseScale);
+          const sz = Math.max(2.5, fr.size * p.scale);
+          c2d.save();
+          c2d.fillStyle = fr.hot ? '#fb923c' : '#94a3b8';
+          c2d.strokeStyle = '#1e293b';
+          c2d.lineWidth = 0.8;
+          c2d.fillRect(p.x - sz / 2, p.y - sz / 2, sz, sz);
+          c2d.strokeRect(p.x - sz / 2, p.y - sz / 2, sz, sz);
+          c2d.restore();
+        });
+
+        // Pass 7: Dimension Callouts (B, S, T, PC, J, H, W_lereng, Pj_koreksi)
+        if (state.showLabels && blastSim.collapseProgress < 0.4) {
+          if (sampleCutHole) {
+            const pT = holePt(sampleCutHole, T_ft * 0.5);
+            const pPC = holePt(sampleCutHole, T_ft + PC_ft * 0.45);
+            const pJ = holePt(sampleCutHole, H_ft - J_ft * 0.5);
+            drawCallout(c2d, pT, 26, -12, `T = ${fmt(T, 2)} ${uLen}`, '#fbbf24', '#fef3c7', width, height, baseScale);
+            drawCallout(c2d, pPC, 28, 2, `PC = ${fmt(PC, 2)} ${uLen}`, '#f97316', '#ffedd5', width, height, baseScale);
+            drawCallout(c2d, pJ, 26, 14, `J = ${fmt(J, 2)} ${uLen}`, '#a855f7', '#f3e8ff', width, height, baseScale);
+          }
+
+          const row0 = cachedHoles.filter(h => h.rowIdx === 0);
+          const row1 = cachedHoles.filter(h => h.rowIdx === 1);
+          if (row0.length > 0 && row1.length > 0) {
+            draw3DLine(c2d, [row0[0].x, effectiveHgtY + 0.3, row0[0].z], [row1[0].x, effectiveHgtY + 0.3, row1[0].z], '#f59e0b', width, height, baseScale, 1.8);
+            drawCallout(
+              c2d,
+              [(row0[0].x + row1[0].x) / 2, effectiveHgtY + 0.3, (row0[0].z + row1[0].z) / 2],
+              -22, -22,
+              `B = ${fmt(B, 2)} ${uLen}`,
+              '#f59e0b', '#fde68a', width, height, baseScale
+            );
+          }
+
+          if (row0.length >= 2) {
+            draw3DLine(c2d, [row0[0].x, effectiveHgtY + 0.3, row0[0].z], [row0[1].x, effectiveHgtY + 0.3, row0[1].z], '#22d3ee', width, height, baseScale, 1.8);
+            drawCallout(
+              c2d,
+              [(row0[0].x + row0[1].x) / 2, effectiveHgtY + 0.3, row0[0].z],
+              0, 22,
+              `S = ${fmt(S, 2)} ${uLen}`,
+              '#22d3ee', '#cffafe', width, height, baseScale
+            );
+          }
+
+          // Height H on back-left vertical edge
+          drawCallout(c2d, [xMin, effectiveHgtY * 0.5, zBack], -24, 0, `H = ${fmt(H, 2)} ${uLen}`, '#e2e8f0', '#ffffff', width, height, baseScale);
+          // Width W on left crest edge
+          drawCallout(c2d, [xMin, effectiveHgtY, 0], -20, -18, `W = ${fmt(W_lereng, 2)} ${uLen}`, '#10b981', '#a7f3d0', width, height, baseScale);
+          // Pj koreksi on back crest edge
+          drawCallout(c2d, [0, effectiveHgtY, zBack], 0, -22, `Pj koreksi = ${fmt(Pj_koreksi, 2)} ${uLen}`, '#38bdf8', '#bae6fd', width, height, baseScale);
+        }
+      }
+
+      function render3DScene() {
+        const rect = dom.canvasWrapper.getBoundingClientRect();
+        const width = Math.max(300, rect.width);
+        const height = Math.max(440, rect.height);
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+        if (dom.canvas.width !== Math.round(width * dpr) || dom.canvas.height !== Math.round(height * dpr)) {
+          dom.canvas.width = Math.round(width * dpr);
+          dom.canvas.height = Math.round(height * dpr);
+        }
+
+        const c2d = dom.canvas.getContext('2d');
+        c2d.save();
+        c2d.scale(dpr, dpr);
+        renderSceneToContext(c2d, width, height);
+        c2d.restore();
+      }
+
+      // =======================================================================
+      // 9. SEQUENTIAL DETONATION & 3D MUCKPILE SIMULATION LOOP
+      // =======================================================================
+      function startBlastSimulation() {
+        cachedHoles.forEach(h => { h.fired = false; });
+        blastSim.active = true;
+        blastSim.simMs = 0;
+        blastSim.collapseProgress = 0;
+        blastSim.fragments = [];
+        blastSim.rings = [];
+        blastSim.flashes = [];
+        dom.hudSimStatus.textContent = 'DETONASI BERJALAN...';
+        showToast('Simulasi peledakan berurutan dimulai!');
+      }
+
+      function resetPitSimulation() {
+        blastSim.active = false;
+        blastSim.simMs = 0;
+        blastSim.collapseProgress = 0;
+        blastSim.fragments = [];
+        blastSim.rings = [];
+        blastSim.flashes = [];
+        cachedHoles.forEach(h => { h.fired = false; });
+        dom.hudSimStatus.textContent = 'SIAP LEDAK';
+        render3DScene();
+      }
+
+      let lastFrameTime = performance.now();
+      function animationLoop(now) {
+        requestAnimationFrame(animationLoop);
+        const dt = Math.min(0.08, (now - lastFrameTime) / 1000);
+        lastFrameTime = now;
+
+        const hasFX = blastSim.fragments.length > 0 || blastSim.rings.length > 0 || blastSim.flashes.length > 0;
+        if (!blastSim.active && !hasFX) return;
+
+        if (blastSim.active) {
+          // Time-scale real delay ms cleanly so a ~500ms shot plays over ~2.8 seconds
+          const maxDelay = cachedHoles.reduce((m, h) => Math.max(m, h.delayMs), 0);
+          const msPerSec = Math.max(180, maxDelay / 2.6);
+          blastSim.simMs += dt * msPerSec;
+
+          let firedCount = 0;
+          cachedHoles.forEach(h => {
+            if (!h.fired && blastSim.simMs >= h.delayMs) {
+              h.fired = true;
+              blastSim.rings.push({ x: h.x, z: h.z, radius: 1.8, alpha: 0.95 });
+              blastSim.flashes.push({ x: h.x, z: h.z, radius: 6.2, alpha: 1.0 });
+
+              const fragScale = calc.SR >= 2 && calc.SR <= 4 ? 1.4 : 2.1;
+              for (let i = 0; i < 6; i++) {
+                blastSim.fragments.push({
+                  x: h.x + (Math.random() - 0.5) * 3,
+                  y: calc.H_lereng_ft * (0.25 + Math.random() * 0.75),
+                  z: h.z + (Math.random() - 0.2) * 3,
+                  vx: (Math.random() - 0.5) * 18,
+                  vy: 15 + Math.random() * 24,
+                  vz: 20 + Math.random() * 30,
+                  size: fragScale * (0.7 + Math.random() * 0.8),
+                  hot: i === 0,
+                  settled: false
+                });
+              }
+            }
+            if (h.fired) firedCount++;
+          });
+
+          const ratio = cachedHoles.length > 0 ? firedCount / cachedHoles.length : 1;
+          blastSim.collapseProgress = Math.min(1, blastSim.collapseProgress + dt * 0.55 * Math.max(0.25, ratio));
+          dom.hudSimStatus.textContent = `MELEDAK: ${firedCount}/${cachedHoles.length} (${Math.round(blastSim.simMs)} ms)`;
+
+          if (blastSim.simMs > maxDelay + 450) {
+            blastSim.active = false;
+            blastSim.collapseProgress = 1;
+            dom.hudSimStatus.textContent = 'MUCKPILE TERBENTUK';
+            showToast('Peledakan selesai! Tumpukan Muckpile 3D terbentuk.');
+          }
+        }
+
+        for (let i = blastSim.rings.length - 1; i >= 0; i--) {
+          const r = blastSim.rings[i];
+          r.radius += 26 * dt;
+          r.alpha -= 1.4 * dt;
+          if (r.alpha <= 0) blastSim.rings.splice(i, 1);
+        }
+
+        for (let i = blastSim.flashes.length - 1; i >= 0; i--) {
+          const fl = blastSim.flashes[i];
+          fl.radius += 16 * dt;
+          fl.alpha -= 2.3 * dt;
+          if (fl.alpha <= 0) blastSim.flashes.splice(i, 1);
+        }
+
+        for (let i = blastSim.fragments.length - 1; i >= 0; i--) {
+          const fr = blastSim.fragments[i];
+          if (!fr.settled) {
+            fr.vy -= 58 * dt;
+            fr.x += fr.vx * dt;
+            fr.y += fr.vy * dt;
+            fr.z += fr.vz * dt;
+            if (fr.y <= 0.6) {
+              fr.y = 0.6 + Math.random() * 1.4;
+              fr.settled = true;
+            }
+          }
+        }
+
+        render3DScene();
+      }
+
+      // =======================================================================
+      // 10. CAMERA PRESETS, TAP-TO-INSPECT HIT TESTING & GESTURE CONTROLS
+      // =======================================================================
+      function setCameraPreset(preset) {
+        dom.camBtns.forEach(b => b.classList.toggle('active', b.dataset.cam === preset));
+        cam.panX = 0;
+        cam.panY = 18;
+
+        if (preset === 'iso') {
+          cam.yaw = -0.64;
+          cam.pitch = 0.43;
+          cam.zoom = 1.0;
+        } else if (preset === 'top') {
+          cam.yaw = 0;
+          cam.pitch = 1.48;
+          cam.zoom = 1.05;
+        } else if (preset === 'side') {
+          cam.yaw = -Math.PI / 2;
+          cam.pitch = 0.14;
+          cam.zoom = 1.12;
+        } else if (preset === 'freeface') {
+          cam.yaw = 0;
+          cam.pitch = 0.22;
+          cam.zoom = 1.08;
+        }
+        render3DScene();
+      }
+
+      // Point-to-segment distance for tapping either borehole collar or vertical column
+      function distToSegment(px, py, x1, y1, x2, y2) {
+        const l2 = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+        if (l2 === 0) return Math.hypot(px - x1, py - y1);
+        let t = ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / l2;
+        t = Math.max(0, Math.min(1, t));
+        return Math.hypot(px - (x1 + t * (x2 - x1)), py - (y1 + t * (y2 - y1)));
+      }
+
+      function handleCanvasTap(clientX, clientY) {
+        const rect = dom.canvas.getBoundingClientRect();
+        const px = clientX - rect.left;
+        const py = clientY - rect.top;
+
+        let bestHole = null;
+        let bestDist = Infinity;
+
+        cachedHoles.forEach(h => {
+          const hitTol = Math.max(18, h.radiusPx + 10);
+          const d = distToSegment(px, py, h.screenX, h.screenY, h.screenBotX, h.screenBotY);
+          if (d <= hitTol && d < bestDist) {
+            bestDist = d;
+            bestHole = h;
+          }
+        });
+
+        if (bestHole) {
+          state.selectedHoleId = bestHole.id;
+          updateInspectCard();
+          render3DScene();
+          showToast(`Lubang #${bestHole.id} dipilih (Delay ${bestHole.delayMs} ms)`);
+        }
+      }
+
+      // Mouse Drag, Click-to-Inspect & Wheel Zoom
+      let isDragging = false;
+      let dragMoved = false;
+      let prevMouse = { x: 0, y: 0 };
+
+      dom.canvas.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        dragMoved = false;
+        prevMouse = { x: e.clientX, y: e.clientY };
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - prevMouse.x;
+        const dy = e.clientY - prevMouse.y;
+        if (Math.hypot(dx, dy) > 3) dragMoved = true;
+        prevMouse = { x: e.clientX, y: e.clientY };
+
+        cam.yaw += dx * 0.008;
+        cam.pitch = Math.max(-1.45, Math.min(1.52, cam.pitch + dy * 0.008));
+        render3DScene();
+      });
+
+      window.addEventListener('mouseup', (e) => {
+        if (isDragging && !dragMoved) {
+          handleCanvasTap(e.clientX, e.clientY);
+        }
+        isDragging = false;
+      });
+
+      dom.canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const factor = e.deltaY < 0 ? 1.1 : 0.9;
+        cam.zoom = Math.max(0.35, Math.min(3.5, cam.zoom * factor));
+        render3DScene();
+      }, { passive: false });
+
+      // Touch Orbit, Pinch Zoom & Tap-to-Inspect
+      let touchMode = 'none';
+      let touchMoved = false;
+      let touchStartPos = { x: 0, y: 0 };
+      let lastTouch = { x: 0, y: 0 };
+      let lastPinchDist = 0;
+
+      dom.canvas.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          touchMode = 'rotate';
+          touchMoved = false;
+          touchStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+          lastTouch = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        } else if (e.touches.length === 2) {
+          touchMode = 'pinch';
+          touchMoved = true;
+          lastPinchDist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+        }
+      }, { passive: true });
+
+      dom.canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        if (touchMode === 'rotate' && e.touches.length === 1) {
+          const dx = e.touches[0].clientX - lastTouch.x;
+          const dy = e.touches[0].clientY - lastTouch.y;
+          if (Math.hypot(e.touches[0].clientX - touchStartPos.x, e.touches[0].clientY - touchStartPos.y) > 8) {
+            touchMoved = true;
+          }
+          lastTouch = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+          cam.yaw += dx * 0.009;
+          cam.pitch = Math.max(-1.45, Math.min(1.52, cam.pitch + dy * 0.009));
+          render3DScene();
+        } else if (touchMode === 'pinch' && e.touches.length === 2) {
+          const dist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          if (lastPinchDist > 0) {
+            cam.zoom = Math.max(0.35, Math.min(3.5, cam.zoom * (dist / lastPinchDist)));
+            render3DScene();
+          }
+          lastPinchDist = dist;
+        }
+      }, { passive: false });
+
+      dom.canvas.addEventListener('touchend', () => {
+        if (touchMode === 'rotate' && !touchMoved) {
+          handleCanvasTap(touchStartPos.x, touchStartPos.y);
+        }
+        touchMode = 'none';
+        lastPinchDist = 0;
+      });
+
+      // =======================================================================
+      // 11. EXPORT PNG SNAPSHOT, CSV REPORT & PRINT/PDF
+      // =======================================================================
+      dom.btnExportPng.addEventListener('click', () => {
+        const snapW = 1400;
+        const snapH = 860;
+        const headerH = 92;
+        const offCanvas = document.createElement('canvas');
+        offCanvas.width = snapW;
+        offCanvas.height = snapH;
+        const octx = offCanvas.getContext('2d');
+
+        // Background
+        octx.fillStyle = '#060a13';
+        octx.fillRect(0, 0, snapW, snapH);
+
+        // Render 3D Scene below header bar
+        octx.save();
+        octx.translate(0, headerH);
+        renderSceneToContext(octx, snapW, snapH - headerH);
+        octx.restore();
+
+        // KM Header Bar
+        octx.fillStyle = '#0c1322';
+        octx.fillRect(0, 0, snapW, headerH);
+        octx.strokeStyle = '#334155';
+        octx.lineWidth = 2;
+        octx.beginPath();
+        octx.moveTo(0, headerH);
+        octx.lineTo(snapW, headerH);
+        octx.stroke();
+
+        // KM Badge
+        octx.fillStyle = '#f59e0b';
+        octx.fillRect(24, 18, 56, 56);
+        octx.fillStyle = '#060a13';
+        octx.font = '900 22px ui-monospace, Menlo, Consolas, monospace';
+        octx.textAlign = 'center';
+        octx.fillText('KM', 52, 53);
+
+        // Title & Summary Metrics
+        const c = calc;
+        octx.textAlign = 'left';
+        octx.fillStyle = '#ffffff';
+        octx.font = '800 21px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        octx.fillText('KM — Desain Peledakan Tambang Terbuka 3D (Metode R.L. Ash)', 96, 42);
+
+        octx.fillStyle = '#22d3ee';
+        octx.font = '700 14px ui-monospace, Menlo, Consolas, monospace';
+        octx.fillText(
+          `B=${fmt(c.B,2)}${c.uLen} | S=${fmt(c.S,2)}${c.uLen} | T=${fmt(c.T,2)}${c.uLen} | J=${fmt(c.J,2)}${c.uLen} | H=${fmt(c.H,2)}${c.uLen} | PC=${fmt(c.PC,2)}${c.uLen} | N=${c.N} lubang | PF=${fmt(c.PF,2)} ${c.uPF} | SR=${fmt(c.SR,2)}`,
+          96, 68
+        );
+
+        const link = document.createElement('a');
+        link.download = `KM_Desain_Peledakan_3D_${state.unit === 'metric' ? 'Metrik' : 'Imperial'}.png`;
+        link.href = offCanvas.toDataURL('image/png');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast('Gambar Desain 3D (.PNG) berhasil disimpan!');
+      });
+
+      dom.btnExportCsv.addEventListener('click', () => {
+        const c = calc;
+        const rows = [
+          ['Bagian', 'Parameter', 'Nilai', 'Satuan'],
+          ['Data Diketahui', 'Target Overburden', c.target_ob.toFixed(2), `${c.uVol}/bln`],
+          ['Data Diketahui', 'Hari Kerja / Bulan', state.hari_kerja, 'hari'],
+          ['Data Diketahui', 'Frekuensi Peledakan / Hari', state.frekuensi, 'kali'],
+          ['Data Diketahui', 'Mining Losses', state.mining_losses, '%'],
+          ['Data Diketahui', 'Tinggi Lereng', c.H_lereng.toFixed(2), c.uLen],
+          ['Data Diketahui', 'Lebar Lereng', c.W_lereng.toFixed(2), c.uLen],
+          ['Data Diketahui', 'Density Batuan', c.rho_rock.toFixed(2), c.uDens],
+          ['Data Diketahui', 'Density Batuan Standar', c.rho_std.toFixed(2), c.uDens],
+          ['Data Diketahui', 'Jarak Pemukiman', c.dist_pemukiman.toFixed(2), c.uLen],
+          ['Data Diketahui', 'Jarak Infrastruktur Vital', c.dist_infra.toFixed(2), c.uLen],
+          ['Data Diketahui', 'Diameter Mata Bor (De)', c.De_disp.toFixed(2), c.uDia],
+          ['Data Diketahui', 'Pola Pemboran', state.pattern, '-'],
+          ['Data Diketahui', 'Kemiringan Muka Jenjang', state.face_angle_deg, 'deg'],
+          ['Data Diketahui', 'Sudut Lubang Bor (Alpha)', state.hole_inc_deg, 'deg'],
+          ['Data Diketahui', 'Delay Antar Lubang / Antar Baris', `${state.delay_hole_ms} / ${state.delay_row_ms}`, 'ms'],
+          ['Data Diketahui', 'Cartridge Count (CC)', state.CC, 'cartridges'],
+          ['Data Diketahui', 'VOD Bahan Peledak', c.VOD_disp.toFixed(2), c.uVel],
+          ['Data Diketahui', 'SG BP Standar', state.SG_std, '-'],
+          ['Data Diketahui', 'VOD Standar', c.VOD_std_disp.toFixed(2), c.uVel],
+          ['Bagian I.a', 'Target Volume Shift (V_target)', c.V_target.toFixed(2), c.uVol],
+          ['Bagian I.a', 'SG Bahan Peledak (SG_BP)', c.SG_BP.toFixed(4), '-'],
+          ['Bagian I.a', 'Adjustment Factor 1 (AF1)', c.AF1.toFixed(4), '-'],
+          ['Bagian I.a', 'Adjustment Factor 2 (AF2)', c.AF2.toFixed(4), '-'],
+          ['Bagian I.a', 'Burden Ratio (KB)', c.KB.toFixed(2), '-'],
+          ['Bagian I.b', 'Burden (B)', c.B.toFixed(2), c.uLen],
+          ['Bagian I.b', 'Jumlah Baris (Row)', c.Row, 'baris'],
+          ['Bagian I.b', 'Spasi (S)', c.S.toFixed(2), c.uLen],
+          ['Bagian I.b', 'Subdrilling (J)', c.J.toFixed(2), c.uLen],
+          ['Bagian I.b', 'Stemming (T)', c.T.toFixed(2), c.uLen],
+          ['Bagian I.b', 'Kedalaman Lubang (H)', c.H.toFixed(2), c.uLen],
+          ['Bagian I.b', 'Kolom Isian (PC)', c.PC.toFixed(2), c.uLen],
+          ['Bagian I.b', 'Panjang Lereng Awal (Pj)', c.Pj.toFixed(2), c.uLen],
+          ['Bagian I.b', 'Jumlah Lubang (N)', c.N, 'lubang'],
+          ['Bagian I.b', 'Panjang Lereng Koreksi', c.Pj_koreksi.toFixed(2), c.uLen],
+          ['Bagian I.b', 'Volume Koreksi', c.V_koreksi.toFixed(2), c.uVol],
+          ['Bagian I.c', 'Volume BP / Lubang', c.V_BP_hole.toFixed(4), c.uVol],
+          ['Bagian I.c', 'Volume BP Total', c.V_BP_total.toFixed(2), c.uVol],
+          ['Bagian I.c', 'Densitas BP', c.rho_BP.toFixed(2), c.uDens],
+          ['Bagian I.c', 'Berat BP Total', c.W_BP_total.toFixed(2), c.uMass],
+          ['Bagian I.c', 'Berat Batuan Terbongkar', c.W_batuan.toFixed(2), 'ton'],
+          ['Bagian I.c', 'Powder Factor (PF)', c.PF.toFixed(2), c.uPF],
+          ['Bagian I.c', 'Blasting Ratio (BR)', c.BR.toFixed(4), c.uBR],
+          ['Bagian I.d', 'Stiffness Ratio (SR)', c.SR.toFixed(2), '-']
+        ];
+
+        const csvContent = rows.map(r => r.join(',')).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `KM_Laporan_Peledakan_${state.unit === 'metric' ? 'Metrik' : 'Imperial'}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        showToast('Laporan CSV berhasil diekspor!');
+      });
+
+      dom.btnPrintPdf.addEventListener('click', () => {
+        window.print();
+      });
+
+      // =======================================================================
+      // 12. EVENT LISTENERS & ORCHESTRATION
+      // =======================================================================
+      function updateAll() {
+        resetPitSimulation();
+        calculateBlastingDesign();
+        buildBoreholeLayout();
+        render3DScene();
+        autoSaveState();
+      }
+
+      // Unit Switcher
+      dom.unitBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetUnit = btn.dataset.unit;
+          if (state.unit === targetUnit) return;
+          state.unit = targetUnit;
+          syncInputsFromState();
+          updateAll();
+          showToast(`Satuan diubah ke ${targetUnit === 'metric' ? 'Metrik (m, kg, m³)' : 'Imperial (ft, lb, bcf)'}`);
+        });
+      });
+
+      // Target Type & Direct Inputs
+      dom.selTargetType.addEventListener('change', () => {
+        state.target_type = dom.selTargetType.value;
+        syncInputsFromState();
+        updateAll();
+      });
+
+      dom.inpTargetOb.addEventListener('input', () => {
+        const v = parseFloat(dom.inpTargetOb.value);
+        if (!isNaN(v)) {
+          if (state.target_type === 'ton') {
+            state.target_ob_ton = v;
+          } else {
+            state.target_ob_bcf = state.unit === 'metric' ? v / CONV.BCF_TO_M3 : v;
+          }
+          updateAll();
+        }
+      });
+
+      dom.selWMode.addEventListener('change', () => {
+        state.w_mode = dom.selWMode.value;
+        syncInputsFromState();
+        updateAll();
+      });
+
+      dom.selBlastSeq.addEventListener('change', () => {
+        state.blast_seq = dom.selBlastSeq.value;
+        updateAll();
+      });
+
+      dom.selSgMode.addEventListener('change', () => {
+        state.sg_mode = dom.selSgMode.value;
+        syncInputsFromState();
+        updateAll();
+      });
+
+      dom.selRowMode.addEventListener('change', () => {
+        state.row_mode = dom.selRowMode.value;
+        syncInputsFromState();
+        updateAll();
+      });
+
+      dom.selHMode.addEventListener('change', () => {
+        state.h_mode = dom.selHMode.value;
+        syncInputsFromState();
+        updateAll();
+      });
+
+      dom.selRoundB.addEventListener('change', () => {
+        state.round_b = Number(dom.selRoundB.value);
+        updateAll();
+      });
+
+      dom.selRoundOther.addEventListener('change', () => {
+        state.round_other = Number(dom.selRoundOther.value);
+        updateAll();
+      });
+
+      function setFormulaVisibility(visible) {
+        state.showFormulas = visible;
+        dom.btnToggleFormulas.textContent = `📖 Tampilkan Rumus: ${state.showFormulas ? 'ON' : 'OFF'}`;
+        dom.btnToggleFormulas.classList.toggle('btn-active', state.showFormulas);
+        dom.formulaModeBtns.forEach(btn => {
+          btn.classList.toggle('active', (btn.dataset.showFormula === 'true') === state.showFormulas);
+        });
+        renderResultsUI();
+        autoSaveState();
+      }
+
+      dom.btnToggleFormulas.addEventListener('click', () => {
+        setFormulaVisibility(!state.showFormulas);
+        showToast(state.showFormulas ? 'Derivasi rumus ditampilkan' : 'Derivasi rumus disembunyikan');
+      });
+
+      dom.formulaModeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const wantShow = btn.dataset.showFormula === 'true';
+          if (state.showFormulas === wantShow) return;
+          setFormulaVisibility(wantShow);
+          showToast(wantShow ? 'Derivasi rumus ditampilkan' : 'Derivasi rumus disembunyikan');
+        });
+      });
+
+      dom.navTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const view = tab.dataset.view;
+          dom.navTabs.forEach(t => t.classList.toggle('active', t === tab));
+          dom.secInput.classList.toggle('section-hidden', view !== 'all' && view !== 'input');
+          dom.sec3d.classList.toggle('section-hidden', view !== 'all' && view !== '3d');
+          dom.secCalc.classList.toggle('section-hidden', view !== 'all' && view !== 'calc');
+          if (view === 'all' || view === '3d') {
+            requestAnimationFrame(() => render3DScene());
+          }
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      });
+
+      // Scenario Manager Events
+      if (dom.btnOpenSaveModal) {
+        dom.btnOpenSaveModal.addEventListener('click', () => {
+          dom.inpScenarioName.value = '';
+          dom.saveModal.classList.add('open');
+          dom.inpScenarioName.focus();
+        });
+      }
+
+      if (dom.btnCloseSaveModal) dom.btnCloseSaveModal.addEventListener('click', () => dom.saveModal.classList.remove('open'));
+      if (dom.btnCancelSave) dom.btnCancelSave.addEventListener('click', () => dom.saveModal.classList.remove('open'));
+
+      if (dom.btnConfirmSave) {
+        dom.btnConfirmSave.addEventListener('click', () => {
+          const name = dom.inpScenarioName.value.trim();
+          if (!name) {
+            showToast('Masukkan nama skenario terlebih dahulu.');
+            return;
+          }
+          const scenarios = getSavedScenarios();
+          const payload = {};
+          Object.keys(DEFAULTS).forEach(k => { payload[k] = state[k]; });
+          payload.unit = state.unit;
+          payload.showFormulas = state.showFormulas;
+          scenarios[name] = payload;
+          try {
+            localStorage.setItem(STORAGE_SCENARIOS, JSON.stringify(scenarios));
+            refreshScenarioDropdown(name);
+            dom.saveModal.classList.remove('open');
+            showToast(`Skenario "${name}" tersimpan!`);
+          } catch (e) {
+            showToast('Gagal menyimpan ke memori perangkat.');
+          }
+        });
+      }
+
+      if (dom.btnLoadScenario) {
+        dom.btnLoadScenario.addEventListener('click', () => {
+          const name = dom.selectScenario.value;
+          if (!name) {
+            showToast('Pilih skenario dari daftar terlebih dahulu.');
+            return;
+          }
+          const scenarios = getSavedScenarios();
+          if (!scenarios[name]) return;
+          Object.keys(DEFAULTS).forEach(k => {
+            if (scenarios[name][k] !== undefined) state[k] = scenarios[name][k];
+          });
+          if (scenarios[name].unit) state.unit = scenarios[name].unit;
+          if (typeof scenarios[name].showFormulas === 'boolean') setFormulaVisibility(scenarios[name].showFormulas);
+          state.selectedHoleId = null;
+          syncInputsFromState();
+          updateAll();
+          showToast(`Skenario "${name}" dimuat.`);
+        });
+      }
+
+      if (dom.btnDeleteScenario) {
+        dom.btnDeleteScenario.addEventListener('click', () => {
+          const name = dom.selectScenario.value;
+          if (!name) return;
+          const scenarios = getSavedScenarios();
+          delete scenarios[name];
+          localStorage.setItem(STORAGE_SCENARIOS, JSON.stringify(scenarios));
+          refreshScenarioDropdown();
+          showToast(`Skenario "${name}" dihapus.`);
+        });
+      }
+
+      // Bind All Numeric & Pattern Inputs
+      const numBindings = [
+        [dom.inpHari, 'hari_kerja', 1],
+        [dom.inpFrek, 'frekuensi', 1],
+        [dom.inpLosses, 'mining_losses', 1],
+        [dom.inpHlereng, 'H_lereng_ft', 'len'],
+        [dom.inpWlereng, 'W_lereng_ft', 'len'],
+        [dom.inpRhobat, 'rho_rock_lbft3', 'dens'],
+        [dom.inpRhostd, 'rho_std_lbft3', 'dens'],
+        [dom.inpDistPemukiman, 'dist_pemukiman_ft', 'len'],
+        [dom.inpDistInfra, 'dist_infra_ft', 'len'],
+        [dom.inpDe, 'De_in', 'dia'],
+        [dom.inpFaceAngle, 'face_angle_deg', 1],
+        [dom.inpHoleInc, 'hole_inc_deg', 1],
+        [dom.inpDelayHole, 'delay_hole_ms', 1],
+        [dom.inpDelayRow, 'delay_row_ms', 1],
+        [dom.inpSgDirect, 'sg_direct', 1],
+        [dom.inpCc, 'CC', 1],
+        [dom.inpSgstd, 'SG_std', 1],
+        [dom.inpVod, 'VOD_fps', 'vel'],
+        [dom.inpVodstd, 'VOD_std_fps', 'vel'],
+        [dom.inpKbstd, 'KB_std', 1],
+        [dom.inpKs, 'KS', 1],
+        [dom.inpKj, 'KJ', 1],
+        [dom.inpKt, 'KT', 1],
+        [dom.inpRowManual, 'row_manual', 1],
+        [dom.inpKh, 'Kh', 1]
+      ];
+
+      numBindings.forEach(([el, key, convType]) => {
+        if (!el) return;
+        el.addEventListener('input', () => {
+          const raw = parseFloat(el.value);
+          if (isNaN(raw)) return;
+          const isM = state.unit === 'metric';
+          let val = raw;
+          if (isM) {
+            if (convType === 'len') val = raw / CONV.FT_TO_M;
+            else if (convType === 'dens') val = raw / CONV.LBFT3_TO_KGM3;
+            else if (convType === 'dia') val = raw / CONV.IN_TO_MM;
+            else if (convType === 'vel') val = raw / CONV.FPS_TO_MS;
+          }
+          state[key] = val;
+          updateAll();
+        });
+      });
+
+      dom.patternBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.pattern = btn.dataset.pattern;
+          dom.patternBtns.forEach(b => b.classList.toggle('active', b === btn));
+          updateAll();
+        });
+      });
+
+      // Reset & Recalculate Buttons
+      if (dom.btnResetDefault) {
+        dom.btnResetDefault.addEventListener('click', () => {
+          Object.assign(state, DEFAULTS);
+          state.selectedHoleId = null;
+          syncInputsFromState();
+          updateAll();
+          setCameraPreset('iso');
+          showToast('Semua parameter dikembalikan ke nilai default.');
+        });
+      }
+
+      if (dom.btnRecalc3d) {
+        dom.btnRecalc3d.addEventListener('click', () => {
+          updateAll();
+          showToast('Perhitungan R.L. Ash & model 3D diperbarui.');
+        });
+      }
+
+      // Camera & Overlay Toggles
+      dom.camBtns.forEach(btn => {
+        btn.addEventListener('click', () => setCameraPreset(btn.dataset.cam));
+      });
+
+      dom.btnZoomIn.addEventListener('click', () => {
+        cam.zoom = Math.min(3.5, cam.zoom * 1.18);
+        render3DScene();
+      });
+
+      dom.btnZoomOut.addEventListener('click', () => {
+        cam.zoom = Math.max(0.35, cam.zoom / 1.18);
+        render3DScene();
+      });
+
+      dom.btnToggleXray.addEventListener('click', () => {
+        state.xray = !state.xray;
+        dom.btnToggleXray.textContent = `X-Ray Batuan: ${state.xray ? 'ON' : 'OFF'}`;
+        dom.btnToggleXray.classList.toggle('btn-active', state.xray);
+        render3DScene();
+      });
+
+      dom.btnToggleTieup.addEventListener('click', () => {
+        state.showTieUp = !state.showTieUp;
+        dom.btnToggleTieup.textContent = `Tie-Up & Delay: ${state.showTieUp ? 'ON' : 'OFF'}`;
+        dom.btnToggleTieup.classList.toggle('btn-active', state.showTieUp);
+        render3DScene();
+      });
+
+      dom.btnToggleLabels.addEventListener('click', () => {
+        state.showLabels = !state.showLabels;
+        dom.btnToggleLabels.textContent = `Dimensi: ${state.showLabels ? 'ON' : 'OFF'}`;
+        dom.btnToggleLabels.classList.toggle('btn-active', state.showLabels);
+        render3DScene();
+      });
+
+      dom.btnToggleFlyrock.addEventListener('click', () => {
+        state.showFlyrock = !state.showFlyrock;
+        dom.btnToggleFlyrock.textContent = `Zona Flyrock: ${state.showFlyrock ? 'ON' : 'OFF'}`;
+        dom.btnToggleFlyrock.classList.toggle('btn-active', state.showFlyrock);
+        dom.flyrockHud.style.display = state.showFlyrock ? 'block' : 'none';
+        render3DScene();
+      });
+
+      dom.btnCloseInspect.addEventListener('click', () => {
+        state.selectedHoleId = null;
+        updateInspectCard();
+        render3DScene();
+      });
+
+      dom.btnSimBlast.addEventListener('click', startBlastSimulation);
+      dom.btnSimReset.addEventListener('click', () => {
+        resetPitSimulation();
+        showToast('Pit 3D dikembalikan ke kondisi utuh.');
+      });
+
+      // Responsive Resize Observer
+      if (typeof ResizeObserver !== 'undefined') {
+        new ResizeObserver(() => render3DScene()).observe(dom.canvasWrapper);
+      }
+      window.addEventListener('resize', render3DScene);
+
+      // Boot on Window Load
+      window.onload = function () {
+        loadAutoSavedState();
+        refreshScenarioDropdown();
+        syncInputsFromState();
+        setFormulaVisibility(state.showFormulas);
+        updateAll();
+        setCameraPreset('iso');
+        requestAnimationFrame(animationLoop);
+      };
+    })();
+  </script>
+</body>
+</html>
